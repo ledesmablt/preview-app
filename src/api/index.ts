@@ -1,5 +1,6 @@
 import prisma from './services/prisma'
-import { Router, Express } from 'express'
+import { json, Router, Express } from 'express'
+import cookieParser from 'cookie-parser'
 
 import { startApolloServer } from './graphql'
 import adminRouter from './modules/admin'
@@ -13,6 +14,8 @@ export async function applyAPIAsMiddleware(app: Express): Promise<Express> {
 
   // actual API
   const apiRouter = Router()
+  apiRouter.use(json())
+  apiRouter.use(cookieParser())
   apiRouter.use('/admin', adminRouter)
   apiRouter.use('/auth', authRouter)
 

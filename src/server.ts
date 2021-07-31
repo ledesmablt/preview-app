@@ -11,11 +11,7 @@ const dev = NODE_ENV === 'development'
 
 async function init() {
   const app = express()
-  app.use(
-    express.json(),
-    compression({ threshold: 0 }),
-    sirv('static', { dev })
-  )
+  app.use(compression({ threshold: 0 }), sirv('static', { dev }))
 
   await applyAPIAsMiddleware(app)
 
