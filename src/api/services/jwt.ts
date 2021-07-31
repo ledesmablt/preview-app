@@ -29,6 +29,25 @@ function verifyToken(token: string) {
   }
 }
 
+export function isLoggedIn(req: Request): boolean {
+  const token = getTokenFromRequest(req)
+  try {
+    verifyToken(token)
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
+function getTokenFromRequest(req: Request): string | undefined {
+  const headerMatch = /Bearer (.*)/.exec(req.headers.authorization ?? '')
+  if (headerMatch) {
+    return headerMatch[1].toString()
+  } else {
+    return req.cookies?.token as string | undefined
+  }
+}
+
 function attachTokenToResponse(token: string, res: Response): void {
   res.cookie('token', token, DEFAULT_COOKIE)
 }
@@ -53,7 +72,7 @@ export const jwtMiddleWare = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { token } = req.cookies ?? {}
+  const token = getTokenFromRequest(req)
   if (!token) {
     return res.status(401).json({ error: 'Missing token' })
   }
