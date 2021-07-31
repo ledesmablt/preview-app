@@ -6,17 +6,22 @@
   ): 'page' | undefined {
     return segment === pageName ? 'page' : undefined
   }
+  let links = [
+    { content: 'home', href: '.', pageName: undefined },
+    { content: 'about', href: 'about', pageName: 'about' },
+    { content: 'form', href: 'form', pageName: 'form' }
+  ]
 </script>
 
 <nav>
   <ul>
-    <li><a aria-current={isCurrentPage(segment)} href=".">home</a></li>
-    <li>
-      <a aria-current={isCurrentPage(segment, 'about')} href="about">about</a>
-    </li>
-    <li>
-      <a aria-current={isCurrentPage(segment, 'form')} href="form">form</a>
-    </li>
+    {#each links as link}
+      <li>
+        <a aria-current={isCurrentPage(segment, link.pageName)} href={link.href}
+          >{link.content}</a
+        >
+      </li>
+    {/each}
   </ul>
 </nav>
 
