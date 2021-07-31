@@ -6,11 +6,7 @@
   ): 'page' | undefined {
     return segment === pageName ? 'page' : undefined
   }
-  let links = [
-    { content: 'home', href: '.', pageName: undefined },
-    { content: 'about', href: 'about', pageName: 'about' },
-    { content: 'form', href: 'form', pageName: 'form' }
-  ]
+  export let links = []
 </script>
 
 <nav>

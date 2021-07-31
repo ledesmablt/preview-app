@@ -1,10 +1,39 @@
 <script lang="ts">
   import Nav from '../components/Nav.svelte'
+  import { isAuthorized } from '../stores'
 
-  export let segment: string
+  export let segment: string | undefined
+  interface NavLink {
+    content: string
+    href: string
+    pageName?: string
+  }
+  let links: NavLink[] = [
+    { content: 'home', href: '.', pageName: undefined },
+    { content: 'form', href: 'form', pageName: 'form' },
+    { content: 'about', href: 'about', pageName: 'about' }
+  ]
+  let adminLinks: NavLink[] = [
+    ...links,
+    {
+      content: 'admin',
+      href: 'admin',
+      pageName: 'admin'
+    }
+  ]
+
+  // persist admin tab if visited or logged in
+  let isAdmin: boolean = false
+  isAuthorized.subscribe((value) => {
+    isAdmin = value || (segment ?? '').startsWith('admin')
+  })
 </script>
 
-<Nav {segment} />
+{#if isAdmin}
+  <Nav {segment} bind:links={adminLinks} />
+{:else}
+  <Nav {segment} bind:links />
+{/if}
 
 <main>
   <slot />
