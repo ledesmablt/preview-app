@@ -5,8 +5,17 @@
     email: 'example@gmail.com'
   }
 
-  function onSubmit(e: Event) {
-    console.log(formData)
+  let submissionStatus: string
+
+  async function onSubmit(e: Event) {
+    const res = await fetch('/form/submit', {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    submissionStatus = res.statusText
   }
 </script>
 
@@ -26,6 +35,10 @@
   <br />
   <button type="submit">Submit</button>
 </form>
+
+{#if submissionStatus}
+  <p>{submissionStatus}</p>
+{/if}
 
 <style>
   .container {
