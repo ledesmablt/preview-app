@@ -11,6 +11,14 @@ generator client {
   previewFeatures = ["mongoDb"]
 }
 
+// TODO: Project model?
+
+model Admin {
+  id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  email     String    @unique
+  password  String
+}
+
 model Order {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
   firstName String

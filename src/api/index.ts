@@ -1,23 +1,31 @@
 import prisma from './services/prisma'
-import type { Express } from 'express'
+import { Router, Express } from 'express'
 
 import { startApolloServer } from './graphql'
+import adminRouter from './modules/admin'
+import authRouter from './modules/auth'
 
 export async function applyAPIAsMiddleware(app: Express): Promise<Express> {
-  // take care to ensure no conflict with sapper routes
+  // other integrations
+  await prisma.$connect()
+  const apolloServer = await startApolloServer()
+  apolloServer.applyMiddleware({ app })
 
-  app.get('/api', async (_req, res) => {
+  // actual API
+  const apiRouter = Router()
+  apiRouter.use('/admin', adminRouter)
+  apiRouter.use('/auth', authRouter)
+
+  apiRouter.get('/', async (_req, res) => {
     return res.send('OK')
   })
 
-  app.get('/list', async (_req, res) => {
+  // TEMP
+  apiRouter.get('/list', async (_req, res) => {
     const submissions = await prisma.order.findMany()
     return res.send({ data: submissions })
   })
 
-  const apolloServer = await startApolloServer()
-  apolloServer.applyMiddleware({ app })
-
-  await prisma.$connect()
+  app.use('/api', apiRouter)
   return app
 }
