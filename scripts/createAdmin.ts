@@ -10,6 +10,15 @@ async function createAdmin() {
     return
   }
 
+  const existing = await prisma.admin.findFirst({
+    where: { email }
+  })
+
+  if (existing) {
+    console.error(`ERROR: email ${email} already exists!`)
+    return
+  }
+
   const result = await prisma.admin.create({
     data: {
       email,
@@ -17,7 +26,8 @@ async function createAdmin() {
     }
   })
   console.log(result)
-  await prisma.$disconnect()
 }
 
-createAdmin()
+createAdmin().finally(async () => {
+  await prisma.$disconnect()
+})

@@ -15,7 +15,7 @@ generator client {
 
 model Admin {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  email     String    @unique
+  email     String
   password  String
 }
 
