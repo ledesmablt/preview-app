@@ -1,19 +1,22 @@
 import sirv from 'sirv'
-import polka from 'polka'
+import express from 'express'
 import compression from 'compression'
 import * as sapper from '@sapper/server'
 
 const { PORT, NODE_ENV } = process.env
 const dev = NODE_ENV === 'development'
 
-polka() // You can also use Express
-  .use(
-    // @ts-ignore
-    compression({ threshold: 0 }),
-    sirv('static', { dev }),
-    sapper.middleware()
-  )
-  // @ts-ignore
-  .listen(PORT, (err) => {
-    if (err) console.log('error', err)
-  })
+const app = express() // You can also use Express
+
+app.use(
+  express.json(),
+  compression({ threshold: 0 }),
+  sirv('static', { dev }),
+  sapper.middleware()
+)
+
+app.listen(PORT, () => {
+  if (dev) {
+    console.log(`Server is running on port ${PORT}!`)
+  }
+})
