@@ -36,6 +36,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Log In</title>
+</svelte:head>
+
 <h1>Log In</h1>
 <form action="submit" on:submit|preventDefault={onSubmit}>
   <label for="email">Email</label>
