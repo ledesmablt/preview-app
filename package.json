@@ -11,8 +11,10 @@
     "validate": "svelte-check --ignore src/node_modules/@sapper"
   },
   "dependencies": {
+    "apollo-server-express": "^3.1.1",
     "compression": "^1.7.1",
     "express": "^4.17.1",
+    "graphql": "^15.5.1",
     "sirv": "^1.0.0"
   },
   "devDependencies": {
