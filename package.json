@@ -5,16 +5,19 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "sapper dev",
-    "build": "tsc && sapper build --legacy",
+    "build": "tsc --noEmit && sapper build --legacy",
     "export": "sapper export --legacy",
     "start": "node __sapper__/build",
-    "validate": "svelte-check --ignore src/node_modules/@sapper"
+    "validate": "svelte-check --ignore src/node_modules/@sapper",
+    "gen": "prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^2.28.0",
     "apollo-server-express": "^3.1.1",
     "compression": "^1.7.1",
     "express": "^4.17.1",
     "graphql": "^15.5.1",
+    "prisma": "^2.28.0",
     "sirv": "^1.0.0"
   },
   "devDependencies": {

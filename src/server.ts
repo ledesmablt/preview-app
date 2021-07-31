@@ -1,11 +1,12 @@
-import sirv from 'sirv'
-import express from 'express'
-import compression from 'compression'
 import * as sapper from '@sapper/server'
+import compression from 'compression'
+import express from 'express'
+import sirv from 'sirv'
 
-import { startApolloServer } from './graphql'
+import { applyAPIAsMiddleware } from './api'
+import prisma from './api/services/prisma'
 
-const { PORT, NODE_ENV } = process.env
+const { NODE_ENV, PORT } = process.env
 const dev = NODE_ENV === 'development'
 
 async function init() {
@@ -16,15 +17,12 @@ async function init() {
     sirv('static', { dev })
   )
 
-  app.get('/api', (_req, res) => {
-    res.send('OK')
-  })
+  await applyAPIAsMiddleware(app)
 
-  const apolloServer = await startApolloServer()
-  apolloServer.applyMiddleware({ app })
-
-  app.use(sapper.middleware()) // always goes last
+  app.use(sapper.middleware())
   app.listen(PORT)
 }
 
-init()
+init().finally(async () => {
+  await prisma.$disconnect()
+})
