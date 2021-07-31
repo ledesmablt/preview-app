@@ -1,19 +1,35 @@
 <script lang="ts">
-  import { isAuthorized } from '../../stores'
+  import { sessionStore } from '../../stores'
+  import type { Session } from '../../stores'
+
   import { goto } from '@sapper/app'
 
-  let authorized: boolean = false
-  isAuthorized.subscribe((val) => {
-    authorized = val
+  let authorized: boolean
+  let session: Partial<Session> = {}
+  sessionStore.subscribe((s) => {
+    authorized = !!s.admin
+    session = s
   })
+
+  $: {
+    if (!authorized && !session.loading) {
+      goto('/admin/login')
+    }
+  }
 
   // TODO: dummy function; this should be at the top app level somehow
   async function checkAuthorized(): Promise<boolean> {
     return new Promise((resolve) => {
+      if (!session.loading) {
+        resolve(!!session.admin)
+      }
       if (!authorized) {
         setTimeout(() => {
-          isAuthorized.update(() => authorized)
-          resolve(authorized)
+          sessionStore.set({
+            loading: false,
+            admin: null
+          })
+          resolve(false)
         }, 200)
       } else {
         resolve(true)
@@ -21,12 +37,7 @@
     })
   }
 
-  let promise: Promise<boolean> = checkAuthorized().then((val) => {
-    if (!val) {
-      goto('/admin/login')
-    }
-    return val
-  })
+  let promise: Promise<boolean> = checkAuthorized()
 </script>
 
 <svelte:head>
@@ -40,7 +51,8 @@
   {#if authorized}
     <p>you're an admin!</p>
   {/if}
-{:catch}
+{:catch err}
+  {console.log(err)}
   <p>Something went wrong!</p>
 {/await}
 

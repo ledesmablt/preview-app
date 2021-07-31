@@ -1,5 +1,31 @@
 <script lang="ts">
+  import { sessionStore } from '../stores'
+
   export let segment: string
+  let authorized: boolean
+
+  sessionStore.subscribe((s) => {
+    authorized = !!s.admin
+  })
+
+  async function logOut() {
+    try {
+      const res = await fetch('/api/auth/logout', {
+        method: 'POST'
+      })
+      if (!res.ok) {
+        throw new Error()
+      } else {
+        sessionStore.set({
+          loading: false,
+          admin: null
+        })
+      }
+    } catch (err) {
+      alert('something went wrong!')
+    }
+  }
+
   function isCurrentPage(
     segment: string,
     pageName?: string
@@ -18,6 +44,10 @@
         >
       </li>
     {/each}
+
+    {#if authorized}
+      <button on:click={logOut}>Log Out</button>
+    {/if}
   </ul>
 </nav>
 

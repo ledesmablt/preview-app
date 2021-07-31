@@ -28,4 +28,11 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   return res.status(200).json({ message: `logged in as ${email}` })
 })
 
+authRouter.post('/logout', async (req: Request, res: Response) => {
+  return res
+    .clearCookie('token')
+    .status(200)
+    .json({ message: 'logged out successfully' })
+})
+
 export default authRouter

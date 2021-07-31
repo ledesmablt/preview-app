@@ -1,6 +1,6 @@
 <script lang="ts">
   import Nav from '../components/Nav.svelte'
-  import { isAuthorized } from '../stores'
+  import { sessionStore } from '../stores'
 
   export let segment: string | undefined
   interface NavLink {
@@ -24,8 +24,8 @@
 
   // persist admin tab if visited or logged in
   let isAdmin: boolean = false
-  isAuthorized.subscribe((value) => {
-    isAdmin = value || (segment ?? '').startsWith('admin')
+  sessionStore.subscribe((s) => {
+    isAdmin = !!s.admin || (segment ?? '').startsWith('admin')
   })
 </script>
 

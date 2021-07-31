@@ -1,12 +1,12 @@
 <script lang="ts">
   import { goto } from '@sapper/app'
-  import { isAuthorized } from '../../stores'
+  import { sessionStore } from '../../stores'
 
   let email: string
   let password: string
 
-  isAuthorized.subscribe((val) => {
-    if (val) {
+  sessionStore.subscribe((s) => {
+    if (!s.loading && s.admin) {
       goto('/admin')
     }
   })
@@ -23,9 +23,15 @@
       }
     })
     if (res.ok) {
-      isAuthorized.set(true)
+      sessionStore.set({
+        loading: false,
+        admin: { email }
+      })
     } else {
-      isAuthorized.set(false)
+      sessionStore.set({
+        loading: false,
+        admin: null
+      })
     }
   }
 </script>
