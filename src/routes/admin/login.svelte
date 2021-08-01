@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { goto } from '@sapper/app'
-  import { sessionStore } from '../../stores'
+  import { goto } from '$app/navigation'
+  import { sessionStore } from '$lib/stores'
 
   let email: string
   let password: string

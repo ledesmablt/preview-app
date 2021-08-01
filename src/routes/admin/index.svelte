@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { sessionStore } from '../../stores'
-  import type { Session } from '../../stores'
+  import { sessionStore } from '$lib/stores'
+  import type { Session } from '$lib/stores'
 
-  import { goto } from '@sapper/app'
+  import { goto } from '$app/navigation'
 
   let authorized: boolean
   let session: Partial<Session> = { loading: true }

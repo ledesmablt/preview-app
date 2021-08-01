@@ -1,4 +1,3 @@
-import type { ExpressContext } from 'apollo-server-express'
 import type { Order } from '@prisma/client'
 
 import prisma from '../services/prisma'
@@ -10,7 +9,7 @@ const resolvers = {
     getOrders: async (
       parent,
       args: GetOrdersArgs,
-      context: ExpressContext,
+      context,
       info
     ): Promise<Order[]> => {
       mustBeLoggedIn(context)

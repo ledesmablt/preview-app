@@ -1,6 +1,6 @@
-import prisma from '../src/api/services/prisma'
 import bcrypt from 'bcrypt'
-import { SALT_ROUNDS } from '../src/api/constants'
+import prisma from '../src/lib/services/prisma'
+import { SALT_ROUNDS } from '../src/lib/constants'
 
 async function createAdmin() {
   const email = process.env.EMAIL

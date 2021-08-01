@@ -1,7 +1,32 @@
 <script lang="ts">
-  import { sessionStore } from '../stores'
+  import { sessionStore } from '$lib/stores'
+  import { page } from '$app/stores'
 
-  export let segment: string
+  let isAdmin: boolean = false
+  sessionStore.subscribe((s) => {
+    isAdmin = !!s.admin || $page.path.startsWith('/admin')
+  })
+
+  interface NavLink {
+    content: string
+    href: string
+  }
+  let links: NavLink[] = [
+    { content: 'home', href: '/' },
+    { content: 'form', href: '/form' },
+    { content: 'about', href: '/about' }
+  ]
+  let adminLinks: NavLink[] = [
+    ...links,
+    {
+      content: 'admin',
+      href: '/admin'
+    }
+  ]
+  if (isAdmin) {
+    links = adminLinks
+  }
+
   let authorized: boolean
 
   sessionStore.subscribe((s) => {
@@ -26,20 +51,19 @@
     }
   }
 
-  function isCurrentPage(
-    segment: string,
-    pageName?: string
-  ): 'page' | undefined {
-    return segment === pageName ? 'page' : undefined
+  function isCurrentPage(href: string, path: string): 'page' | undefined {
+    if (href === '/') {
+      return href === path ? 'page' : undefined
+    }
+    return path.startsWith(href) ? 'page' : undefined
   }
-  export let links = []
 </script>
 
 <nav>
   <ul>
     {#each links as link}
       <li>
-        <a aria-current={isCurrentPage(segment, link.pageName)} href={link.href}
+        <a aria-current={isCurrentPage(link.href, $page.path)} href={link.href}
           >{link.content}</a
         >
       </li>
