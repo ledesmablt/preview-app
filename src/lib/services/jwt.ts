@@ -1,5 +1,5 @@
 import * as cookie from 'cookie'
-import * as jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import type { Request, Response } from '@sveltejs/kit'
 import type { Admin } from '@prisma/client'
 

@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import type { Request, Response } from 'express'
 import prisma from '$lib/services/prisma'
 
@@ -11,12 +10,10 @@ export async function post(req: Request, res: Response) {
       body: result
     }
   } catch (e) {
-    if (e instanceof Prisma.PrismaClientValidationError) {
-      return {
-        status: 400,
-        body: {
-          message: e.message
-        }
+    return {
+      status: 400,
+      body: {
+        message: e.message
       }
     }
   }

@@ -5,3 +5,5 @@ yarn-error.log
 /.svelte-kit/
 .env
 *.map
+build
+src/lib/styles/tailwind-output.css
