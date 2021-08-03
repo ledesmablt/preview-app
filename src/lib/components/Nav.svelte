@@ -1,37 +1,28 @@
 <script lang="ts">
-  import { session } from '$app/stores'
-  import { page } from '$app/stores'
-
-  let isAdmin: boolean = false
-  session.subscribe((s) => {
-    isAdmin = !!s.admin || $page.path.startsWith('/admin')
-  })
+  import { session, page } from '$app/stores'
+  import { goto } from '$app/navigation'
 
   interface NavLink {
     content: string
     href: string
   }
-  let links: NavLink[] = [
+
+  const pageIsAdmin = $page.path.startsWith('/admin')
+  let showAdminTab: boolean = $session.admin || pageIsAdmin
+
+  let nonAdminLinks: NavLink[] = [
     { content: 'home', href: '/' },
     { content: 'form', href: '/form' },
     { content: 'about', href: '/about' }
   ]
   let adminLinks: NavLink[] = [
-    ...links,
+    ...nonAdminLinks,
     {
       content: 'admin',
       href: '/admin'
     }
   ]
-  if (isAdmin) {
-    links = adminLinks
-  }
-
-  let authorized: boolean
-
-  session.subscribe((s) => {
-    authorized = !!s.admin
-  })
+  $: links = showAdminTab ? adminLinks : nonAdminLinks
 
   async function logOut() {
     try {
@@ -41,10 +32,11 @@
       if (!res.ok) {
         throw new Error()
       } else {
-        session.set({
-          loading: false,
-          admin: null
-        })
+        session.set({})
+        showAdminTab = false
+        if (pageIsAdmin) {
+          goto('/')
+        }
       }
     } catch (err) {
       alert('something went wrong!')
@@ -73,7 +65,7 @@
       </li>
     {/each}
 
-    {#if authorized}
+    {#if $session.admin}
       <button on:click={logOut}>Log Out</button>
     {/if}
   </ul>

@@ -2,22 +2,16 @@
   import { goto } from '$app/navigation'
   import { session } from '$app/stores'
   import { onMount } from 'svelte'
-
-  let email: string
-  let password: string
-  let authorized = false
-
-  session.subscribe((s) => {
-    if (s.admin) {
-      authorized = true
-    }
-  })
+  $: authorized = $session.admin
 
   onMount(() => {
     if (authorized) {
       goto('/admin')
     }
   })
+
+  let email: string
+  let password: string
 
   async function onSubmit(e: Event) {
     if (!email || !password) {

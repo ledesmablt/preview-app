@@ -16,6 +16,11 @@ export async function handle({
   if (request.path.startsWith('/api')) {
     return await resolve(request)
   }
+  if (request.path === '/api/auth/logout') {
+    const response = await resolve(request)
+    request.locals.admin = null
+    return response
+  }
   return await checkSession({ request, resolve })
 }
 
