@@ -1,9 +1,9 @@
 import { isLoggedIn, deleteCookieFromHeader } from '$lib/services/jwt'
-import type { Request, EndpointOutput } from '@sveltejs/kit'
+import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type { Admin } from '@prisma/client'
 
 interface Args {
-  request: Request
+  request: Request<Locals>
   resolve: any
 }
 
@@ -24,7 +24,7 @@ export async function handle({
   return await checkSession({ request, resolve })
 }
 
-export function getSession(request: Request) {
+export function getSession(request: Request<Locals>) {
   return request.locals || {}
 }
 
