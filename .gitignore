@@ -7,3 +7,4 @@ yarn-error.log
 *.map
 build
 src/lib/styles/tailwind-output.css
+tailwind.config.js

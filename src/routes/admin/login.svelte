@@ -40,20 +40,28 @@
   <title>Log In</title>
 </svelte:head>
 
-<h1>Log In</h1>
+<h1 class="text-xl pb-4 font-semibold">Log In</h1>
 <form action="submit" on:submit|preventDefault={onSubmit}>
   <label for="email">Email</label>
   <input name="email" bind:value={email} />
   <label for="password">Password</label>
   <input name="password" type="password" bind:value={password} />
   <br />
-  <button type="submit">Log In</button>
+  <button class="submit" type="submit">Log In</button>
 </form>
 
 <style>
   form {
-    display: flex;
-    flex-direction: column;
-    max-width: 300px;
+    @apply flex flex-1 flex-col max-w-md;
+  }
+  label {
+    @apply py-1;
+  }
+  input {
+    @apply border rounded px-2 py-1 mb-1 text-sm;
+  }
+
+  .submit {
+    @apply rounded bg-orange-300 w-max py-1 px-5 hover:bg-orange-500;
   }
 </style>

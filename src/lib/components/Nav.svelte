@@ -59,13 +59,17 @@
   }
 </script>
 
-<nav>
+<nav class="font-light border-b border-gray-250 px-4">
   <ul>
     {#each links as link}
-      <li>
-        <a aria-current={isCurrentPage(link.href, $page.path)} href={link.href}
-          >{link.content}</a
+      <li class="block float-left">
+        <a
+          class="no-underline px-2 py-4 block"
+          aria-current={isCurrentPage(link.href, $page.path)}
+          href={link.href}
         >
+          {link.content}
+        </a>
       </li>
     {/each}
 
@@ -76,27 +80,11 @@
 </nav>
 
 <style>
-  nav {
-    border-bottom: 1px solid rgba(255, 62, 0, 0.1);
-    font-weight: 300;
-    padding: 0 1em;
-  }
-
-  ul {
-    margin: 0;
-    padding: 0;
-  }
-
   /* clearfix */
   ul::after {
     content: '';
     display: block;
     clear: both;
-  }
-
-  li {
-    display: block;
-    float: left;
   }
 
   [aria-current] {
@@ -109,14 +97,9 @@
     content: '';
     width: calc(100% - 1em);
     height: 2px;
+    /* TODO: align with theme */
     background-color: rgb(255, 62, 0);
     display: block;
     bottom: -1px;
-  }
-
-  a {
-    text-decoration: none;
-    padding: 1em 0.5em;
-    display: block;
   }
 </style>
