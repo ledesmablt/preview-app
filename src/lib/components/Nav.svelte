@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { sessionStore } from '$lib/stores'
+  import { session } from '$app/stores'
   import { page } from '$app/stores'
 
   let isAdmin: boolean = false
-  sessionStore.subscribe((s) => {
+  session.subscribe((s) => {
     isAdmin = !!s.admin || $page.path.startsWith('/admin')
   })
 
@@ -29,7 +29,7 @@
 
   let authorized: boolean
 
-  sessionStore.subscribe((s) => {
+  session.subscribe((s) => {
     authorized = !!s.admin
   })
 
@@ -41,7 +41,7 @@
       if (!res.ok) {
         throw new Error()
       } else {
-        sessionStore.set({
+        session.set({
           loading: false,
           admin: null
         })

@@ -3,7 +3,7 @@ import prisma from '$lib/services/prisma'
 
 import type { Admin } from '@prisma/client'
 import type { Request, Response, EndpointOutput } from '@sveltejs/kit'
-import { signToken } from '$lib/services/jwt'
+import { signAndAttachCookieToHeader } from '$lib/services/jwt'
 
 export async function post(
   req: Request,
@@ -28,9 +28,10 @@ export async function post(
       body: { message: 'Invalid email or password' }
     }
   }
-  signToken({ userId: admin.id }, undefined, res)
+  const headers = signAndAttachCookieToHeader({ userId: admin.id })
   return {
     status: 200,
+    headers,
     body: { message: `logged in as ${email}` }
   }
 }

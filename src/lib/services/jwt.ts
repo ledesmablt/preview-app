@@ -1,12 +1,18 @@
 import * as cookie from 'cookie'
 import jwt from 'jsonwebtoken'
-import type { Request, Response } from '@sveltejs/kit'
+import type { Request } from '@sveltejs/kit'
+import type { Headers } from '@sveltejs/kit/types/helper'
 import type { Admin } from '@prisma/client'
 
 import prisma from '$lib/services/prisma'
+import { DEFAULT_COOKIE } from '$lib/constants'
 
 interface TokenPayload extends jwt.JwtPayload {
   userId: string
+}
+interface SignTokenOptions {
+  duration?: string
+  asCookie?: boolean
 }
 
 const JWT_SECRET = (import.meta.env.VITE_JWT_SECRET || '') as string
@@ -19,6 +25,14 @@ function verifyToken(token: string) {
     payload
   }
 }
+function getTokenFromRequest({ headers }: Request): string | undefined {
+  const headerMatch = /Bearer (.*)/.exec(headers.authorization || '')
+  if (headerMatch) {
+    return headerMatch[1].toString()
+  } else {
+    return cookie.parse(headers.cookie || '').token
+  }
+}
 
 export async function isLoggedIn(req: Request): Promise<Admin | undefined> {
   const token = getTokenFromRequest(req)
@@ -26,9 +40,8 @@ export async function isLoggedIn(req: Request): Promise<Admin | undefined> {
   try {
     payload = verifyToken(token).payload
   } catch (e) {
-    return
+    throw e
   }
-
   const admin = await prisma.admin.findFirst({
     where: {
       id: payload.userId
@@ -37,30 +50,44 @@ export async function isLoggedIn(req: Request): Promise<Admin | undefined> {
   return admin
 }
 
-function getTokenFromRequest(req: Request): string | undefined {
-  const headerMatch = /Bearer (.*)/.exec(req.headers.authorization || '')
-  if (headerMatch) {
-    return headerMatch[1].toString()
-  } else {
-    return cookie.parse(req.headers.cookie || '').token
-  }
-}
-
-function attachTokenToResponse(token: string, res: Response): void {
-  res.headers['set-cookie'] = cookie.serialize('token', token)
-}
-
 export function signToken(
   payload: TokenPayload,
-  duration: string = '10m',
-  res?: Response
+  { duration = '10m', asCookie = false }: SignTokenOptions
 ): string {
   const token = jwt.sign(payload, JWT_SECRET, {
     algorithm: 'HS256',
     expiresIn: duration
   })
-  if (res) {
-    attachTokenToResponse(token, res)
+  if (asCookie) {
+    return cookie.serialize('token', token, DEFAULT_COOKIE)
   }
   return token
+}
+
+export function attachCookieToHeader(
+  cookie: string,
+  header: Headers = {}
+): Headers {
+  return {
+    ...header,
+    'set-cookie': cookie
+  }
+}
+
+export function signAndAttachCookieToHeader(
+  payload: TokenPayload,
+  header?: Headers
+): Headers {
+  const cookie = signToken(payload, { asCookie: true })
+  return attachCookieToHeader(cookie, header)
+}
+
+export function deleteCookieFromHeader(header: Headers = {}): Headers {
+  return {
+    ...header,
+    'set-cookie': cookie.serialize('token', '', {
+      path: '/',
+      expires: new Date()
+    })
+  }
 }

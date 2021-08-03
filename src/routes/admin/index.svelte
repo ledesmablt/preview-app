@@ -1,34 +1,28 @@
 <script lang="ts">
-  import { sessionStore } from '$lib/stores'
-  import type { Session } from '$lib/stores'
+  import { session } from '$app/stores'
+  import { onMount } from 'svelte'
 
   import { goto } from '$app/navigation'
 
   let authorized: boolean
-  let session: Partial<Session> = { loading: true }
-  sessionStore.subscribe((s) => {
+  session.subscribe((s) => {
     authorized = !!s.admin
-    session = s
   })
 
-  $: {
-    if (!authorized && !session.loading) {
+  onMount(() => {
+    if (!authorized) {
       goto('/admin/login')
     }
-  }
+  })
 </script>
 
 <svelte:head>
   <title>Admin</title>
 </svelte:head>
 
-{#if session.loading}
-  <p>loading...</p>
-{:else}
+{#if authorized}
   <h1>Admin</h1>
-  {#if authorized}
-    <p>you're an admin!</p>
-  {/if}
+  <p>you're an admin!</p>
 {/if}
 
 <style>

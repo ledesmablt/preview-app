@@ -1,12 +1,20 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import { sessionStore } from '$lib/stores'
+  import { session } from '$app/stores'
+  import { onMount } from 'svelte'
 
   let email: string
   let password: string
+  let authorized = false
 
-  sessionStore.subscribe((s) => {
-    if (!s.loading && s.admin) {
+  session.subscribe((s) => {
+    if (s.admin) {
+      authorized = true
+    }
+  })
+
+  onMount(() => {
+    if (authorized) {
       goto('/admin')
     }
   })
@@ -23,14 +31,13 @@
       }
     })
     if (res.ok) {
-      sessionStore.set({
-        loading: false,
+      session.set({
+        loaded: true,
         admin: { email }
       })
     } else {
-      sessionStore.set({
-        loading: false,
-        admin: null
+      session.set({
+        loaded: true
       })
     }
   }
@@ -40,15 +47,17 @@
   <title>Log In</title>
 </svelte:head>
 
-<h1 class="text-xl pb-4 font-semibold">Log In</h1>
-<form action="submit" on:submit|preventDefault={onSubmit}>
-  <label for="email">Email</label>
-  <input name="email" bind:value={email} />
-  <label for="password">Password</label>
-  <input name="password" type="password" bind:value={password} />
-  <br />
-  <button class="submit" type="submit">Log In</button>
-</form>
+{#if !authorized}
+  <h1 class="text-xl pb-4 font-semibold">Log In</h1>
+  <form action="submit" on:submit|preventDefault={onSubmit}>
+    <label for="email">Email</label>
+    <input name="email" bind:value={email} />
+    <label for="password">Password</label>
+    <input name="password" type="password" bind:value={password} />
+    <br />
+    <button class="submit" type="submit">Log In</button>
+  </form>
+{/if}
 
 <style>
   form {
