@@ -1,5 +1,6 @@
 <script lang="ts">
   import '../app.css'
+  import '$lib/styles/tailwind-output.css'
   import { onMount } from 'svelte'
   import Nav from '$lib/components/Nav.svelte'
   import { sessionStore } from '$lib/stores'
