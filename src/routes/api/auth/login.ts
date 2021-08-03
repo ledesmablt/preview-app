@@ -21,6 +21,7 @@ export async function post(
     if (!validPassword) {
       throw new Error()
     }
+    req.locals.admin = admin
   } catch (e) {
     console.error(e)
     return {
