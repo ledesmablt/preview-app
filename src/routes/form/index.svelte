@@ -1,4 +1,5 @@
 <script lang="ts">
+  import axios from 'axios'
   let formData = {
     firstName: 'Juan',
     lastName: 'dela Cruz',
@@ -8,14 +9,12 @@
   let submissionStatus: string
 
   async function onSubmit(e: Event) {
-    const res = await fetch('/form/submit', {
-      method: 'POST',
-      body: JSON.stringify(formData),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    submissionStatus = res.statusText
+    try {
+      const res = await axios.post('/form/submit', formData)
+      submissionStatus = res.statusText
+    } catch (err) {
+      submissionStatus = err.response?.data?.message
+    }
   }
 </script>
 

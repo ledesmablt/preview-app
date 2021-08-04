@@ -2,7 +2,8 @@
   import { goto } from '$app/navigation'
   import { session } from '$app/stores'
   import { onMount } from 'svelte'
-  $: authorized = $session.admin
+  import axios from 'axios'
+  $: authorized = $session.seller
 
   onMount(() => {
     if (authorized) {
@@ -12,24 +13,18 @@
 
   let email: string
   let password: string
+  let submissionError: string = ''
 
   async function onSubmit(e: Event) {
-    if (!email || !password) {
-      alert('both email and password required!')
-    }
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    if (res.ok) {
-      res.json()
-      $session = { loaded: true, admin: { email } }
+    try {
+      const res = await axios.post('/api/auth/login', {
+        email,
+        password
+      })
+      $session = { seller: res.data }
       goto('/manage')
-    } else {
-      $session = { loaded: true }
+    } catch (err) {
+      submissionError = err.response?.data?.message
     }
   }
 </script>
@@ -47,6 +42,9 @@
     <input name="password" type="password" bind:value={password} />
     <br />
     <button class="submit" type="submit">Log In</button>
+    {#if submissionError}
+      <span class="error mt-4">Error: {submissionError}</span>
+    {/if}
   </form>
 {/if}
 
@@ -63,5 +61,8 @@
 
   .submit {
     @apply rounded bg-orange-300 w-max py-1 px-5 hover:bg-orange-500;
+  }
+  .error {
+    @apply text-red-600 text-xs mb-1;
   }
 </style>

@@ -3,7 +3,7 @@
   import { session } from '$app/stores'
   import { onMount } from 'svelte'
 
-  $: authorized = !!$session.admin
+  $: authorized = !!$session.seller
 
   onMount(() => {
     if (!authorized) {

@@ -6,7 +6,7 @@
   import type { Validation } from '$lib/utils/validation/signup'
   import axios from 'axios'
 
-  $: authorized = $session.admin
+  $: authorized = $session.seller
   onMount(() => {
     if (authorized) {
       goto('/manage')

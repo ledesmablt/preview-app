@@ -1,42 +1,38 @@
 <script lang="ts">
   import { session, page } from '$app/stores'
   import { goto } from '$app/navigation'
+  import axios from 'axios'
 
   interface NavLink {
     content: string
     href: string
   }
 
-  let nonAdminLinks: NavLink[] = [
+  let nonSellerLinks: NavLink[] = [
     { content: 'home', href: '/' },
     { content: 'form', href: '/form' },
     { content: 'about', href: '/about' }
   ]
-  let adminLinks: NavLink[] = [
-    ...nonAdminLinks,
+  let sellerLinks: NavLink[] = [
+    ...nonSellerLinks,
     {
       content: 'manage',
       href: '/manage'
     }
   ]
-  $: links = $session.admin ? adminLinks : nonAdminLinks
+  $: links = $session.seller ? sellerLinks : nonSellerLinks
   $: pageUnderManage = $page.path.startsWith('/manage')
 
   async function logOut() {
     try {
-      const res = await fetch('/api/auth/logout', {
-        method: 'POST'
-      })
-      if (!res.ok) {
-        throw new Error()
-      } else {
-        session.set({})
-        if (pageUnderManage) {
-          goto('/')
-        }
+      await axios.post('/api/auth/logout')
+      $session = {}
+      if (pageUnderManage) {
+        goto('/')
       }
     } catch (err) {
       alert('something went wrong!')
+      console.error(err)
     }
   }
 
@@ -64,7 +60,7 @@
   </ul>
 
   <span class="h-auto container inline-block self-center text-right">
-    {#if $session.admin}
+    {#if $session.seller}
       <button class="authBtn" on:click={logOut}>log out</button>
     {:else}
       <button class="authBtn" id="signUp" on:click={() => goto('/signup')}
