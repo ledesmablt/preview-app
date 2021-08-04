@@ -51,8 +51,8 @@
   }
 </script>
 
-<nav class="font-light border-b border-gray-250 px-4">
-  <ul>
+<nav class="flex font-light border-b border-gray-250 px-4">
+  <ul class="container">
     {#each links as link}
       <li class="block float-left">
         <a
@@ -64,11 +64,13 @@
         </a>
       </li>
     {/each}
-
-    {#if $session.admin}
-      <button on:click={logOut}>Log Out</button>
-    {/if}
   </ul>
+
+  {#if $session.admin}
+    <span class="h-auto container inline-block self-center text-right">
+      <button class="logoutBtn" on:click={logOut}>log out</button>
+    </span>
+  {/if}
 </nav>
 
 <style>
@@ -93,5 +95,9 @@
     background-color: rgb(255, 62, 0);
     display: block;
     bottom: -1px;
+  }
+
+  .logoutBtn {
+    @apply rounded-md px-2 py-1 text-sm font-light border border-gray-200 hover:bg-gray-200 transition duration-200;
   }
 </style>
