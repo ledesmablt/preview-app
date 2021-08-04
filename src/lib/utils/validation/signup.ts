@@ -1,6 +1,7 @@
 import { validateEmail } from './_helpers'
 
 interface ValidationErrors {
+  username?: string
   email?: string
   password?: string
   confirmPassword?: string
@@ -13,6 +14,11 @@ export interface Validation {
 
 export function validate(body: any): Validation {
   const errors = {
+    username: !body.username
+      ? 'Username is required'
+      : body.username.length < 4
+      ? 'Username must be at least 4 characters long'
+      : undefined,
     email: !body.email
       ? 'Email is required'
       : validateEmail(body.email)

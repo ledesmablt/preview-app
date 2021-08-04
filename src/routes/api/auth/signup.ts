@@ -8,6 +8,7 @@ import { validate } from '$lib/utils/validation/signup'
 import { SALT_ROUNDS } from '$lib/constants'
 
 interface Body {
+  username: string
   email: string
   password: string
   confirmPassword: string
@@ -26,18 +27,22 @@ export async function post(
       }
     }
   }
-  const { email, password: rawPassword } = req.body
+  const { username, email, password: rawPassword } = req.body
   let seller: Seller | null
   let existingSeller = await prisma.seller.findFirst({
     where: {
-      email
+      OR: [{ email }, { username }]
     }
   })
   if (existingSeller) {
     return {
       status: 400,
       body: {
-        message: `Account already exists for email ${email}`
+        message:
+          `Account already exists for ` +
+          (existingSeller.email === email
+            ? `email ${email}`
+            : `username ${username}`)
       }
     }
   }
@@ -45,6 +50,7 @@ export async function post(
   const password = await bcrypt.hash(rawPassword, SALT_ROUNDS)
   seller = await prisma.seller.create({
     data: {
+      username,
       email,
       password
     }
@@ -56,7 +62,7 @@ export async function post(
     status: 200,
     headers,
     body: {
-      message: `Successfully created account for ${email}`,
+      message: `Successfully created account ${username} for ${email}`,
       data: seller
     }
   }

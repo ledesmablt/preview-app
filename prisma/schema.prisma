@@ -15,7 +15,8 @@ generator client {
 
 model Seller {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  email     String
+  username  String    @unique
+  email     String    @unique
   password  String
 }
 

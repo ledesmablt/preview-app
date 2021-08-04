@@ -14,6 +14,7 @@
   })
 
   let formData = {
+    username: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -25,6 +26,7 @@
   $: {
     validation = validate(formData)
     fieldErrors = {
+      username: formData.username && validation.errors?.username,
       email: formData.email && validation.errors?.email,
       password: formData.password && validation.errors?.password,
       confirmPassword:
@@ -53,6 +55,15 @@
 {#if !authorized}
   <h1 class="text-xl pb-4 font-semibold">Sign Up</h1>
   <form action="submit" on:submit|preventDefault={onSubmit}>
+    <label for="username">Username</label>
+    <input
+      name="username"
+      bind:value={formData.username}
+      placeholder="myusername"
+    />
+    {#if fieldErrors.username}
+      <span class="error">{fieldErrors.username}</span>
+    {/if}
     <label for="email">Email</label>
     <input
       name="email"
