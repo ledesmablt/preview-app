@@ -11,16 +11,15 @@
     }
   })
 
-  let email: string
-  let password: string
+  let formData = {
+    email: '',
+    password: ''
+  }
   let submissionError: string = ''
 
   async function onSubmit(e: Event) {
     try {
-      const res = await axios.post('/api/auth/login', {
-        email,
-        password
-      })
+      const res = await axios.post('/api/auth/login', formData)
       $session = { seller: res.data }
       goto('/manage')
     } catch (err) {
@@ -37,9 +36,9 @@
   <h1 class="text-xl pb-4 font-semibold">Log In</h1>
   <form action="submit" on:submit|preventDefault={onSubmit}>
     <label for="email">Email</label>
-    <input name="email" bind:value={email} />
+    <input name="email" bind:value={formData.email} />
     <label for="password">Password</label>
-    <input name="password" type="password" bind:value={password} />
+    <input name="password" type="password" bind:value={formData.password} />
     <br />
     <button class="submit" type="submit">Log In</button>
     {#if submissionError}

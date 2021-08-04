@@ -13,19 +13,22 @@
     }
   })
 
-  let email: string = ''
-  let password: string = ''
-  let confirmPassword: string = ''
+  let formData = {
+    email: '',
+    password: '',
+    confirmPassword: ''
+  }
   let fieldErrors: any = null
   let validation: Validation = {}
   let submissionError: string = ''
 
   $: {
-    validation = validate({ email, password, confirmPassword })
+    validation = validate(formData)
     fieldErrors = {
-      email: email && validation.errors?.email,
-      password: password && validation.errors?.password,
-      confirmPassword: confirmPassword && validation.errors?.confirmPassword
+      email: formData.email && validation.errors?.email,
+      password: formData.password && validation.errors?.password,
+      confirmPassword:
+        formData.confirmPassword && validation.errors?.confirmPassword
     }
   }
   $: submitDisabled =
@@ -34,11 +37,7 @@
   async function onSubmit(e: Event) {
     submissionError = ''
     try {
-      const res = await axios.post('/api/auth/signup', {
-        email,
-        password,
-        confirmPassword
-      })
+      const res = await axios.post('/api/auth/signup', formData)
       $session = { loaded: true, seller: res.data }
       goto('/manage')
     } catch (err) {
@@ -55,12 +54,16 @@
   <h1 class="text-xl pb-4 font-semibold">Sign Up</h1>
   <form action="submit" on:submit|preventDefault={onSubmit}>
     <label for="email">Email</label>
-    <input name="email" bind:value={email} placeholder="email@example.com" />
+    <input
+      name="email"
+      bind:value={formData.email}
+      placeholder="email@example.com"
+    />
     {#if fieldErrors.email}
       <span class="error">{fieldErrors.email}</span>
     {/if}
     <label for="password">Password</label>
-    <input name="password" type="password" bind:value={password} />
+    <input name="password" type="password" bind:value={formData.password} />
     {#if fieldErrors.password}
       <span class="error">{fieldErrors.password}</span>
     {/if}
@@ -68,7 +71,7 @@
     <input
       name="confirmPassword"
       type="password"
-      bind:value={confirmPassword}
+      bind:value={formData.confirmPassword}
     />
     {#if fieldErrors.confirmPassword}
       <span class="error">{fieldErrors.confirmPassword}</span>
