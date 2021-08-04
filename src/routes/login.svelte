@@ -29,6 +29,7 @@
         loaded: true,
         admin: { email }
       })
+      goto('/admin')
     } else {
       session.set({
         loaded: true

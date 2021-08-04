@@ -7,7 +7,7 @@
 
   onMount(() => {
     if (!authorized) {
-      goto('/admin/login')
+      goto('/login')
     }
   })
 </script>

@@ -7,9 +7,6 @@
     href: string
   }
 
-  const pageIsAdmin = $page.path.startsWith('/admin')
-  let showAdminTab: boolean = $session.admin || pageIsAdmin
-
   let nonAdminLinks: NavLink[] = [
     { content: 'home', href: '/' },
     { content: 'form', href: '/form' },
@@ -22,7 +19,8 @@
       href: '/admin'
     }
   ]
-  $: links = showAdminTab ? adminLinks : nonAdminLinks
+  $: links = $session.admin ? adminLinks : nonAdminLinks
+  $: pageIsAdmin = $page.path.startsWith('/admin')
 
   async function logOut() {
     try {
@@ -33,7 +31,6 @@
         throw new Error()
       } else {
         session.set({})
-        showAdminTab = false
         if (pageIsAdmin) {
           goto('/')
         }
@@ -66,11 +63,13 @@
     {/each}
   </ul>
 
-  {#if $session.admin}
-    <span class="h-auto container inline-block self-center text-right">
-      <button class="logoutBtn" on:click={logOut}>log out</button>
-    </span>
-  {/if}
+  <span class="h-auto container inline-block self-center text-right">
+    {#if $session.admin}
+      <button class="authBtn" on:click={logOut}>log out</button>
+    {:else}
+      <button class="authBtn" on:click={() => goto('/login')}>log in</button>
+    {/if}
+  </span>
 </nav>
 
 <style>
@@ -97,7 +96,7 @@
     bottom: -1px;
   }
 
-  .logoutBtn {
-    @apply rounded-md px-2 py-1 text-sm font-light border border-gray-200 hover:bg-gray-200 transition duration-200;
+  .authBtn {
+    @apply rounded-md px-3 py-1 text-sm font-light border border-gray-200 hover:bg-gray-100 transition duration-200;
   }
 </style>
