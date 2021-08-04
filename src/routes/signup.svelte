@@ -4,6 +4,7 @@
   import { onMount } from 'svelte'
   import { validate } from '$lib/utils/validation/signup'
   import type { Validation } from '$lib/utils/validation/signup'
+  import axios from 'axios'
 
   $: authorized = $session.admin
   onMount(() => {
@@ -17,6 +18,7 @@
   let confirmPassword: string = ''
   let fieldErrors: any = null
   let validation: Validation = {}
+  let submissionError: string = ''
 
   $: {
     validation = validate({ email, password, confirmPassword })
@@ -30,19 +32,17 @@
     Object.values(fieldErrors).filter(Boolean).length > 0 || !validation.isValid
 
   async function onSubmit(e: Event) {
-    const res = await fetch('/api/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, confirmPassword }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    if (res.ok) {
-      res.json()
-      $session = { loaded: true, admin: { email } }
+    submissionError = ''
+    try {
+      const res = await axios.post('/api/auth/signup', {
+        email,
+        password,
+        confirmPassword
+      })
+      $session = { loaded: true, seller: res.data }
       goto('/manage')
-    } else {
-      $session = { loaded: true }
+    } catch (err) {
+      submissionError = err.response?.data?.message
     }
   }
 </script>
@@ -77,6 +77,9 @@
     <button class="submit" type="submit" disabled={submitDisabled}
       >Sign Up</button
     >
+    {#if submissionError}
+      <span class="error mt-4">Error: {submissionError}</span>
+    {/if}
   </form>
 {/if}
 

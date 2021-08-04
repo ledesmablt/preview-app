@@ -67,6 +67,9 @@
     {#if $session.admin}
       <button class="authBtn" on:click={logOut}>log out</button>
     {:else}
+      <button class="authBtn" id="signUp" on:click={() => goto('/signup')}
+        >sign up</button
+      >
       <button class="authBtn" on:click={() => goto('/login')}>log in</button>
     {/if}
   </span>
@@ -98,5 +101,8 @@
 
   .authBtn {
     @apply rounded-md px-3 py-1 text-sm font-light border border-gray-200 hover:bg-gray-100 transition duration-200;
+  }
+  #signUp {
+    @apply bg-orange-200 hover:bg-orange-400;
   }
 </style>
