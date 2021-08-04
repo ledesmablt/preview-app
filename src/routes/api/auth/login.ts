@@ -9,17 +9,25 @@ export async function post(
   req: Request,
   res: Response
 ): Promise<EndpointOutput> {
-  const { email, password } = req.body as any
-  let seller: Seller
+  const { emailOrUsername, password } = req.body as any
+  let seller: Seller | null
   try {
     seller = await prisma.seller.findFirst({
       where: {
-        email
+        OR: [
+          { email: emailOrUsername },
+          {
+            username: emailOrUsername
+          }
+        ]
       }
     })
+    if (!seller) {
+      throw new Error('Seller not found')
+    }
     const validPassword = bcrypt.compareSync(password, seller.password)
     if (!validPassword) {
-      throw new Error()
+      throw new Error('Invalid password')
     }
     req.locals.seller = seller
   } catch (e) {
@@ -33,6 +41,6 @@ export async function post(
   return {
     status: 200,
     headers,
-    body: { message: `logged in as ${email}` }
+    body: { message: `Logged in as ${emailOrUsername}` }
   }
 }

@@ -12,7 +12,7 @@
   })
 
   let formData = {
-    email: '',
+    emailOrUsername: '',
     password: ''
   }
   let submissionError: string = ''
@@ -35,8 +35,8 @@
 {#if !authorized}
   <h1 class="text-xl pb-4 font-semibold">Log In</h1>
   <form action="submit" on:submit|preventDefault={onSubmit}>
-    <label for="email">Email</label>
-    <input name="email" bind:value={formData.email} />
+    <label for="emailOrUsername">Email or username</label>
+    <input name="emailOrUsername" bind:value={formData.emailOrUsername} />
     <label for="password">Password</label>
     <input name="password" type="password" bind:value={formData.password} />
     <br />
