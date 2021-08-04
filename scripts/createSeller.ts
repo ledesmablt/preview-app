@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt'
 import prisma from '../src/lib/services/prisma'
 import { SALT_ROUNDS } from '../src/lib/constants'
 
-async function createAdmin() {
+async function createSeller() {
   const email = process.env.EMAIL
   const password = process.env.PASSWORD
   if (!email || !password) {
@@ -10,7 +10,7 @@ async function createAdmin() {
     return
   }
 
-  const existing = await prisma.admin.findFirst({
+  const existing = await prisma.seller.findFirst({
     where: { email }
   })
 
@@ -19,7 +19,7 @@ async function createAdmin() {
     return
   }
 
-  const result = await prisma.admin.create({
+  const result = await prisma.seller.create({
     data: {
       email,
       password: bcrypt.hashSync(password, SALT_ROUNDS)
@@ -28,6 +28,6 @@ async function createAdmin() {
   console.log(result)
 }
 
-createAdmin().finally(async () => {
+createSeller().finally(async () => {
   await prisma.$disconnect()
 })

@@ -13,7 +13,7 @@ generator client {
 
 // TODO: Project model?
 
-model Admin {
+model Seller {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
   email     String
   password  String

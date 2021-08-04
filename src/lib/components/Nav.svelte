@@ -15,12 +15,12 @@
   let adminLinks: NavLink[] = [
     ...nonAdminLinks,
     {
-      content: 'admin',
-      href: '/admin'
+      content: 'manage',
+      href: '/manage'
     }
   ]
   $: links = $session.admin ? adminLinks : nonAdminLinks
-  $: pageIsAdmin = $page.path.startsWith('/admin')
+  $: pageUnderManage = $page.path.startsWith('/manage')
 
   async function logOut() {
     try {
@@ -31,7 +31,7 @@
         throw new Error()
       } else {
         session.set({})
-        if (pageIsAdmin) {
+        if (pageUnderManage) {
           goto('/')
         }
       }

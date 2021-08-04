@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import prisma from '$lib/services/prisma'
 
-import type { Admin } from '@prisma/client'
+import type { Seller } from '@prisma/client'
 import type { Request, Response, EndpointOutput } from '@sveltejs/kit'
 import { signAndAttachCookieToHeader } from '$lib/services/jwt'
 
@@ -10,18 +10,18 @@ export async function post(
   res: Response
 ): Promise<EndpointOutput> {
   const { email, password } = req.body as any
-  let admin: Admin
+  let seller: Seller
   try {
-    admin = await prisma.admin.findFirst({
+    seller = await prisma.seller.findFirst({
       where: {
         email
       }
     })
-    const validPassword = bcrypt.compareSync(password, admin.password)
+    const validPassword = bcrypt.compareSync(password, seller.password)
     if (!validPassword) {
       throw new Error()
     }
-    req.locals.admin = admin
+    req.locals.seller = seller
   } catch (e) {
     console.error(e)
     return {
@@ -29,7 +29,7 @@ export async function post(
       body: { message: 'Invalid email or password' }
     }
   }
-  const headers = signAndAttachCookieToHeader({ userId: admin.id })
+  const headers = signAndAttachCookieToHeader({ userId: seller.id })
   return {
     status: 200,
     headers,

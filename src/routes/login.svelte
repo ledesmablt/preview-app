@@ -6,7 +6,7 @@
 
   onMount(() => {
     if (authorized) {
-      goto('/admin')
+      goto('/manage')
     }
   })
 
@@ -25,15 +25,11 @@
       }
     })
     if (res.ok) {
-      session.set({
-        loaded: true,
-        admin: { email }
-      })
-      goto('/admin')
+      res.json()
+      $session = { loaded: true, admin: { email } }
+      goto('/manage')
     } else {
-      session.set({
-        loaded: true
-      })
+      $session = { loaded: true }
     }
   }
 </script>

@@ -2,7 +2,7 @@ import * as cookie from 'cookie'
 import jwt from 'jsonwebtoken'
 import type { Request } from '@sveltejs/kit'
 import type { Headers } from '@sveltejs/kit/types/helper'
-import type { Admin } from '@prisma/client'
+import type { Seller } from '@prisma/client'
 
 import prisma from '$lib/services/prisma'
 import { DEFAULT_COOKIE } from '$lib/constants'
@@ -34,7 +34,7 @@ function getTokenFromRequest({ headers }: Request): string | undefined {
   }
 }
 
-export async function isLoggedIn(req: Request): Promise<Admin | undefined> {
+export async function isLoggedIn(req: Request): Promise<Seller | undefined> {
   const token = getTokenFromRequest(req)
   let payload: TokenPayload
   try {
@@ -42,12 +42,12 @@ export async function isLoggedIn(req: Request): Promise<Admin | undefined> {
   } catch (e) {
     throw e
   }
-  const admin = await prisma.admin.findFirst({
+  const seller = await prisma.seller.findFirst({
     where: {
       id: payload.userId
     }
   })
-  return admin
+  return seller
 }
 
 export function signToken(

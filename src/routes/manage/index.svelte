@@ -13,12 +13,12 @@
 </script>
 
 <svelte:head>
-  <title>Admin</title>
+  <title>Manage</title>
 </svelte:head>
 
 {#if authorized}
-  <h1>Admin</h1>
-  <p>you're an admin!</p>
+  <h1>Manage</h1>
+  <p>You're a seller!</p>
 {/if}
 
 <style>
