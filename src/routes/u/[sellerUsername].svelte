@@ -5,6 +5,12 @@
     const username = page.params.sellerUsername
     const res = await fetch(`/api/seller?username=${username}`)
     const seller = (await res.json()).data as Partial<Seller>
+    if (!seller) {
+      return {
+        status: 404,
+        error: new Error(`Seller ${username} not found`)
+      }
+    }
     return {
       props: {
         email: seller.email,
@@ -17,10 +23,50 @@
 </script>
 
 <script lang="ts">
+  import axios from 'axios'
+  import { page } from '$app/stores'
+  import { session } from '$lib/stores'
+
+  $: authorizedForPage =
+    $session.seller?.username === $page.params.sellerUsername &&
+    $page.params.sellerUsername
+
   export let email: string
   export let bio: string
   export let username: string
   export let userImageUrl: string
+
+  let imageInput: HTMLElement
+
+  async function onImageChange(e: any) {
+    e.preventDefault()
+    const image: File = e.target?.files[0]
+    const contentType = image.type
+    const signedUrlRes = await axios.post('/api/seller/storage', {
+      isPublic: true,
+      filePath: 'userImage',
+      contentType
+    })
+    const { signedUrl } = signedUrlRes.data
+    try {
+      await axios({
+        method: 'PUT',
+        url: signedUrl,
+        data: image,
+        headers: {
+          'Content-Type': contentType
+        }
+      })
+      let reader = new FileReader()
+      reader.readAsDataURL(image)
+      reader.onload = (e) => {
+        const newImageUrl = e.target?.result as string
+        userImageUrl = newImageUrl
+      }
+    } finally {
+      e.target.value = ''
+    }
+  }
 </script>
 
 <svelte:head>
@@ -28,17 +74,39 @@
 </svelte:head>
 
 {#if userImageUrl}
-  <img
-    class="w-24 h-24 rounded-full object-cover mr-8 float-left"
-    src={userImageUrl}
-    alt={`${username} display picture`}
-  />
+  <div class="flex flex-col float-left">
+    <img
+      class="w-24 h-24 rounded-full object-cover mr-8"
+      src={userImageUrl}
+      alt={`${username} display picture`}
+    />
+    {#if authorizedForPage}
+      <div
+        on:click={() => {
+          imageInput.click()
+        }}
+      >
+        <label class="cursor-pointer" for="userImageUpload">Upload image</label>
+        <input
+          type="file"
+          name="userImageUpload"
+          accept=".jpg, .jpeg, .png"
+          class="hidden"
+          bind:this={imageInput}
+          on:change={onImageChange}
+        />
+      </div>
+    {/if}
+  </div>
 {/if}
-<h1>{username}</h1>
-<p>{email}</p>
-{#if bio}
-  <p>{bio}</p>
-{/if}
+
+<div>
+  <h1>{username}</h1>
+  <p>{email}</p>
+  {#if bio}
+    <p>{bio}</p>
+  {/if}
+</div>
 
 <style>
 </style>
