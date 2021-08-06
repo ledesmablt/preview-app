@@ -1,4 +1,5 @@
 import prisma from '$lib/services/prisma'
+import { publicBucket } from '$lib/services/storage'
 import type { Request, Response, EndpointOutput } from '@sveltejs/kit'
 
 import type { Seller } from '@prisma/client'
@@ -33,12 +34,16 @@ export async function get(
   }
 
   const { email, bio } = seller
+  const [[file]] = await publicBucket.getFiles({
+    prefix: `sellers/${username}/userImage`
+  })
   return {
     body: {
       data: {
         email,
         bio,
-        username
+        username,
+        userImageUrl: file ? file.publicUrl() : null
       }
     }
   }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-PROJECT="general-scripts-273314"
-NAME="digital-assets-form"
+PROJECT="preview-app-322100"
+NAME="preview-app"
 REGION="asia-southeast1"
 URL="gcr.io/$PROJECT/$NAME"
 
