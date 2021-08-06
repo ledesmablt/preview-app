@@ -19,7 +19,6 @@ model Seller {
   email     String    @unique
   password  String
   bio       String?
-  userImageUrl String?
 }
 
 model Order {

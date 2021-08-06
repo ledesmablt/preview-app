@@ -33,7 +33,6 @@ export async function get(req: Request): Promise<EndpointOutput> {
   }
 
   const { email, bio } = seller
-  // TODO: get from db & handle file upload in PUT
   const [[file]] = await publicBucket.getFiles({
     prefix: `sellers/${username}/userImage`
   })

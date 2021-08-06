@@ -73,32 +73,34 @@
   <title>{username}</title>
 </svelte:head>
 
-{#if userImageUrl}
-  <div class="flex flex-col float-left">
+<div class="flex flex-col float-left">
+  {#if userImageUrl}
     <img
-      class="w-24 h-24 rounded-full object-cover mr-8"
+      class="userImage"
       src={userImageUrl}
       alt={`${username} display picture`}
     />
-    {#if authorizedForPage}
-      <div
-        on:click={() => {
-          imageInput.click()
-        }}
-      >
-        <label class="cursor-pointer" for="userImageUpload">Upload image</label>
-        <input
-          type="file"
-          name="userImageUpload"
-          accept=".jpg, .jpeg, .png"
-          class="hidden"
-          bind:this={imageInput}
-          on:change={onImageChange}
-        />
-      </div>
-    {/if}
-  </div>
-{/if}
+  {:else}
+    <div class="userImage bg-gray-300" />
+  {/if}
+  {#if authorizedForPage}
+    <div
+      on:click={() => {
+        imageInput.click()
+      }}
+    >
+      <label class="cursor-pointer" for="userImageUpload">Upload image</label>
+      <input
+        type="file"
+        name="userImageUpload"
+        accept=".jpg, .jpeg, .png"
+        class="hidden"
+        bind:this={imageInput}
+        on:change={onImageChange}
+      />
+    </div>
+  {/if}
+</div>
 
 <div>
   <h1>{username}</h1>
@@ -109,4 +111,7 @@
 </div>
 
 <style>
+  .userImage {
+    @apply w-24 h-24 rounded-full object-cover mr-8;
+  }
 </style>
