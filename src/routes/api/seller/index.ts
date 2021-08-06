@@ -1,15 +1,12 @@
 import bcrypt from 'bcrypt'
 import prisma from '$lib/services/prisma'
 import { publicBucket } from '$lib/services/storage'
-import type { Request, Response, EndpointOutput } from '@sveltejs/kit'
+import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 
 import type { Seller } from '@prisma/client'
 import { SALT_ROUNDS } from '$lib/constants'
 
-export async function get(
-  req: Request,
-  res: Response
-): Promise<EndpointOutput> {
+export async function get(req: Request): Promise<EndpointOutput> {
   const username = req.query.get('username')
   if (!username) {
     return {
@@ -52,19 +49,19 @@ export async function get(
   }
 }
 
-export async function put(req: Request): Promise<EndpointOutput> {
-  // TODO: validate if actual user
-  const { username, ...rawUpdateBody } = req.body as any
-  if (!username) {
+export async function put(req: Request<Locals>): Promise<EndpointOutput> {
+  const { seller } = req.locals
+  if (!seller) {
     return {
-      status: 401,
-      body: {
-        message: 'Missing parameter [username]'
-      }
+      status: 403
     }
   }
-  // TODO: validate all fields
+  const { username } = seller
+  const rawUpdateBody = req.body as any
   const updateBody: Partial<Seller> = {}
+
+  // TODO: validate all fields
+
   if (rawUpdateBody.bio) {
     updateBody.bio = rawUpdateBody.bio
   }

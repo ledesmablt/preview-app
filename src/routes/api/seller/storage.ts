@@ -1,11 +1,10 @@
-import { isLoggedIn } from '$lib/services/jwt'
 import { publicBucket, privateBucket } from '$lib/services/storage'
-import type { Request, EndpointOutput } from '@sveltejs/kit'
+import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 
 const EXPIRES_SECONDS = 10 * 60
 
-export async function post(req: Request): Promise<EndpointOutput> {
-  const seller = await isLoggedIn(req)
+export async function post(req: Request<Locals>): Promise<EndpointOutput> {
+  const { seller } = req.locals
   if (!seller) {
     return {
       status: 403

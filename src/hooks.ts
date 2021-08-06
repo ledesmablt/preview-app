@@ -8,19 +8,20 @@ interface Args {
   resolve: any
 }
 
+const AUTH_IGNORE_ROUTES = ['/api/auth']
+
 // fires after every page render / server request
 export async function handle({
   request,
   resolve
 }: Args): Promise<EndpointOutput> {
-  // don't check session for api routes
-  if (request.path.startsWith('/api')) {
-    return await resolve(request)
-  }
   if (request.path === '/api/auth/logout') {
     const response = await resolve(request)
     request.locals.seller = null
     return response
+  }
+  if (AUTH_IGNORE_ROUTES.some((v) => request.path.startsWith(v))) {
+    return await resolve(request)
   }
   return await checkSession({ request, resolve })
 }

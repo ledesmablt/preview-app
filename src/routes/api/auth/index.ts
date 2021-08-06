@@ -1,16 +1,8 @@
-import type { Request, Response, EndpointOutput } from '@sveltejs/kit'
+import type { Request, Response, EndpointOutput, Locals } from '@sveltejs/kit'
 
-import { isLoggedIn } from '$lib/services/jwt'
-import type { Seller } from '@prisma/client'
-
-export async function get(
-  req: Request,
-  res: Response
-): Promise<EndpointOutput> {
-  let seller: Seller | null
-  try {
-    seller = await isLoggedIn(req)
-  } catch (err) {
+export async function get(req: Request<Locals>): Promise<EndpointOutput> {
+  const { seller } = req.locals
+  if (!seller) {
     return {
       status: 401,
       headers: {
