@@ -41,6 +41,6 @@ export async function post(
   return {
     status: 200,
     headers,
-    body: { message: `Logged in as ${emailOrUsername}` }
+    body: { message: `Logged in as ${seller.username}`, data: seller }
   }
 }

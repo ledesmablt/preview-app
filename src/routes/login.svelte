@@ -20,7 +20,7 @@
   async function onSubmit(e: Event) {
     try {
       const res = await axios.post('/api/auth/login', formData)
-      $session = { seller: res.data }
+      $session = { seller: res.data.data }
       goto('/manage')
     } catch (err) {
       submissionError = err.response?.data?.message
