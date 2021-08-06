@@ -40,7 +40,8 @@ export async function isLoggedIn(req: Request): Promise<Seller | null> {
   try {
     payload = verifyToken(token).payload
   } catch (e) {
-    throw e
+    // TODO: handle token refresh
+    return null
   }
   const seller = await prisma.seller.findFirst({
     where: {
@@ -52,7 +53,7 @@ export async function isLoggedIn(req: Request): Promise<Seller | null> {
 
 export function signToken(
   payload: TokenPayload,
-  { duration = '10m', asCookie = false }: SignTokenOptions
+  { duration = '7d', asCookie = false }: SignTokenOptions
 ): string {
   const token = jwt.sign(payload, JWT_SECRET, {
     algorithm: 'HS256',
