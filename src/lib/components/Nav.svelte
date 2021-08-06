@@ -10,7 +10,6 @@
 
   let nonSellerLinks: NavLink[] = [
     { content: 'home', href: '/' },
-    { content: 'form', href: '/form' },
     { content: 'about', href: '/about' }
   ]
   let sellerLinks: NavLink[] = [
