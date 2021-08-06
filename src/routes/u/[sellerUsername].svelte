@@ -1,9 +1,10 @@
 <script lang="ts" context="module">
+  import type { Seller } from '@prisma/client'
   import type { Load } from '@sveltejs/kit'
   export const load: Load = async ({ page, fetch }) => {
     const username = page.params.sellerUsername
     const res = await fetch(`/api/seller?username=${username}`)
-    const seller = (await res.json()).data
+    const seller = (await res.json()).data as Partial<Seller>
     return {
       props: {
         email: seller.email,
