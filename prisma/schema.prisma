@@ -18,6 +18,7 @@ model Seller {
   username  String    @unique
   email     String    @unique
   password  String
+  bio       String?
 }
 
 model Order {
