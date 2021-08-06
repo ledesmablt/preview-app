@@ -25,7 +25,7 @@ function verifyToken(token: string) {
     payload
   }
 }
-function getTokenFromRequest({ headers }: Request): string | undefined {
+function getTokenFromRequest({ headers }: Request): string {
   const headerMatch = /Bearer (.*)/.exec(headers.authorization || '')
   if (headerMatch) {
     return headerMatch[1].toString()
@@ -34,7 +34,7 @@ function getTokenFromRequest({ headers }: Request): string | undefined {
   }
 }
 
-export async function isLoggedIn(req: Request): Promise<Seller | undefined> {
+export async function isLoggedIn(req: Request): Promise<Seller | null> {
   const token = getTokenFromRequest(req)
   let payload: TokenPayload
   try {

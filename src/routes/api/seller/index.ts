@@ -13,7 +13,7 @@ export async function get(
   const username = req.query.get('username')
   if (!username) {
     return {
-      status: 401,
+      status: 400,
       body: {
         message: 'Missing parameter [username]'
       }

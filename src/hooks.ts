@@ -1,6 +1,7 @@
 import { isLoggedIn, deleteCookieFromHeader } from '$lib/services/jwt'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type { Seller } from '@prisma/client'
+import type { Session } from '$lib/stores'
 
 interface Args {
   request: Request<Locals>
@@ -24,7 +25,7 @@ export async function handle({
   return await checkSession({ request, resolve })
 }
 
-export function getSession(request: Request<Locals>) {
+export function getSession(request: Request<Locals>): Session {
   return request.locals || {}
 }
 
@@ -32,7 +33,7 @@ async function checkSession({
   request,
   resolve
 }: Args): Promise<EndpointOutput> {
-  let seller: Seller
+  let seller: Seller | null
   try {
     seller = await isLoggedIn(request)
     request.locals.seller = seller

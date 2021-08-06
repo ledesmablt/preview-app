@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { session, page } from '$app/stores'
+  import { session } from '$lib/stores'
+  import { page } from '$app/stores'
   import { goto } from '$app/navigation'
   import axios from 'axios'
 

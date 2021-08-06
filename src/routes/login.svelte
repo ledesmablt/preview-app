@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import { session } from '$app/stores'
+  import { session } from '$lib/stores'
   import { onMount } from 'svelte'
   import axios from 'axios'
   $: authorized = $session.seller

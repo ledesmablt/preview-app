@@ -7,7 +7,7 @@ export async function get(
   req: Request,
   res: Response
 ): Promise<EndpointOutput> {
-  let seller: Seller | undefined
+  let seller: Seller | null
   try {
     seller = await isLoggedIn(req)
   } catch (err) {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation'
-  import { session } from '$app/stores'
+  import { session } from '$lib/stores'
   import { onMount } from 'svelte'
   import { validate } from '$lib/utils/validation/signup'
   import type { Validation } from '$lib/utils/validation/signup'
@@ -40,7 +40,7 @@
     submissionError = ''
     try {
       const res = await axios.post('/api/auth/signup', formData)
-      $session = { loaded: true, seller: res.data }
+      $session = { seller: res.data.data }
       goto('/manage')
     } catch (err) {
       submissionError = err.response?.data?.message
