@@ -1,10 +1,9 @@
 <script lang="ts" context="module">
-  import type { Seller } from '@prisma/client'
   import type { Load } from '@sveltejs/kit'
   export const load: Load = async ({ page, fetch }) => {
     const username = page.params.sellerUsername
     const res = await fetch(`/api/seller?username=${username}`)
-    const seller = (await res.json()).data as Partial<Seller>
+    const seller = (await res.json()).data
     if (!seller) {
       return {
         status: 404,
