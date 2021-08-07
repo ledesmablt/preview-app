@@ -99,7 +99,7 @@
   <title>{username}</title>
 </svelte:head>
 
-<div class="flex flex-col float-left">
+<div class="flex flex-col float-left items-center mr-8">
   {#if userImageUrl}
     <img
       class="userImage"
@@ -109,13 +109,14 @@
   {:else}
     <div class="userImage bg-gray-300" />
   {/if}
-  {#if authorizedForPage}
+  {#if authorizedForPage && isEdit}
     <div
+      class="editBtn"
       on:click={() => {
         imageInput.click()
       }}
     >
-      <label class="cursor-pointer" for="userImageUpload">Upload image</label>
+      <label class="cursor-pointer" for="userImageUpload">change</label>
       <input
         type="file"
         name="userImageUpload"
@@ -129,9 +130,9 @@
 </div>
 
 <div>
-  <div class="flex flex-col">
+  <div class="flex flex-col max-w-md">
     {#if !isEdit}
-      <h1>{username}</h1>
+      <p>{username}</p>
       <p>{email}</p>
       {#if bio}
         <p>{bio}</p>
@@ -170,12 +171,12 @@
 
 <style>
   .userImage {
-    @apply w-24 h-24 rounded-full object-cover mr-8;
+    @apply w-24 h-24 rounded-full object-cover;
   }
   .editBtn {
     @apply rounded border border-gray-200 px-2 mt-2;
   }
   .editField {
-    @apply border border-gray-400;
+    @apply border border-gray-400 rounded mb-1 max-w-md;
   }
 </style>
