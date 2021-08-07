@@ -73,12 +73,17 @@ export async function put(req: Request<Locals>): Promise<EndpointOutput> {
   if (rawUpdateBody.password) {
     updateBody.password = await bcrypt.hash(rawUpdateBody.password, SALT_ROUNDS)
   }
-  if (rawUpdateBody.image) {
-    // TODO: do gcs upload
+  const select: Partial<Record<keyof Seller, boolean>> = {}
+  for (let key in updateBody) {
+    if (key === 'password') {
+      continue
+    }
+    select[key as keyof Seller] = true
   }
 
   try {
     const seller = await prisma.seller.update({
+      select,
       where: { username },
       data: updateBody
     })

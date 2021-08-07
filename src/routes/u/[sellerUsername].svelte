@@ -36,6 +36,13 @@
   export let userImageUrl: string
 
   let imageInput: HTMLElement
+  let isEdit = false
+  let isSaving = false
+  let editFormData = {
+    email,
+    bio,
+    username
+  }
 
   async function onImageChange(e: any) {
     e.preventDefault()
@@ -65,6 +72,26 @@
     } finally {
       e.target.value = ''
     }
+  }
+  async function onSave() {
+    const changedValues = {
+      email: editFormData.email !== email ? editFormData.email : undefined,
+      username:
+        editFormData.username !== username ? editFormData.username : undefined,
+      bio: editFormData.bio !== bio ? editFormData.bio : undefined
+    }
+    if (Object.values(changedValues).filter(Boolean).length === 0) {
+      // no changes
+      isEdit = false
+      return
+    }
+    isSaving = true
+    await axios.put('/api/seller', changedValues)
+    email = editFormData.email
+    username = editFormData.username
+    bio = editFormData.bio
+    isEdit = false
+    isSaving = false
   }
 </script>
 
@@ -102,15 +129,53 @@
 </div>
 
 <div>
-  <h1>{username}</h1>
-  <p>{email}</p>
-  {#if bio}
-    <p>{bio}</p>
+  <div class="flex flex-col">
+    {#if !isEdit}
+      <h1>{username}</h1>
+      <p>{email}</p>
+      {#if bio}
+        <p>{bio}</p>
+      {/if}
+    {:else}
+      <input class="editField" bind:value={editFormData.username} />
+      <input class="editField" bind:value={editFormData.email} />
+      <textarea class="editField" bind:value={editFormData.bio} />
+    {/if}
+  </div>
+
+  {#if authorizedForPage}
+    <div>
+      <button
+        class="editBtn"
+        class:cursor-wait={isSaving}
+        disabled={isSaving}
+        on:click={() => {
+          isEdit = !isEdit
+        }}
+      >
+        {isEdit ? 'cancel' : 'edit'}
+      </button>
+      {#if isEdit}
+        <button
+          class="editBtn bg-gray-300"
+          class:bg-gray-300={!isSaving}
+          class:cursor-wait={isSaving}
+          disabled={isSaving}
+          on:click={onSave}>{isSaving ? 'saving...' : 'save'}</button
+        >
+      {/if}
+    </div>
   {/if}
 </div>
 
 <style>
   .userImage {
     @apply w-24 h-24 rounded-full object-cover mr-8;
+  }
+  .editBtn {
+    @apply rounded border border-gray-200 px-2 mt-2;
+  }
+  .editField {
+    @apply border border-gray-400;
   }
 </style>
