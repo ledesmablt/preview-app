@@ -28,7 +28,7 @@
   import { getChangedFields } from '$lib/utils/client'
   import type {
     Seller_Get_Data,
-    Seller_Put_Data,
+    Seller_Put_Body,
     Seller_Put_Endpoint
   } from '$lib/types/api'
 
@@ -39,9 +39,9 @@
   export let seller: Seller_Get_Data
 
   let imageInput: HTMLElement
-  let isEdit = false
+  let isEditing = false
   let isSaving = false
-  let editFormData: Seller_Put_Data = {
+  let editFormData: Seller_Put_Body = {
     email: seller.email,
     bio: seller.bio,
     username: seller.username
@@ -80,7 +80,7 @@
     const changedValues = getChangedFields(editFormData, seller)
     if (Object.values(changedValues).filter(Boolean).length === 0) {
       // no changes
-      isEdit = false
+      isEditing = false
       return
     }
     isSaving = true
@@ -89,7 +89,7 @@
       changedValues
     )
     seller = { ...seller, ...res.data.data }
-    isEdit = false
+    isEditing = false
     isSaving = false
   }
 </script>
@@ -108,7 +108,7 @@
   {:else}
     <div class="userImage bg-gray-300" />
   {/if}
-  {#if authorizedForPage && isEdit}
+  {#if authorizedForPage && isEditing}
     <div
       class="editBtn"
       on:click={() => {
@@ -130,7 +130,7 @@
 
 <div>
   <div class="flex flex-col max-w-md">
-    {#if !isEdit}
+    {#if !isEditing}
       <p>{seller.username}</p>
       <p>{seller.email}</p>
       {#if seller.bio}
@@ -150,12 +150,12 @@
         class:cursor-wait={isSaving}
         disabled={isSaving}
         on:click={() => {
-          isEdit = !isEdit
+          isEditing = !isEditing
         }}
       >
-        {isEdit ? 'cancel' : 'edit'}
+        {isEditing ? 'cancel' : 'edit'}
       </button>
-      {#if isEdit}
+      {#if isEditing}
         <button
           class="editBtn bg-gray-300"
           class:bg-gray-300={!isSaving}
