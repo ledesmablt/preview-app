@@ -16,25 +16,28 @@ model Seller {
   username  String    @unique
   email     String    @unique
   password  String
-  bio       String?
+  bio       String    @default("")
+
   products  Product[]
 }
 
 model Product {
   id          String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  sellerId    String  @db.ObjectId
-  seller      Seller  @relation(fields: [sellerId], references: [id])
   name        String  @default("new product (draft)")
-  description String?
+  description String  @default("")
   price       Float   @default(1.00)
   currency    String  @default("USD")
+  enabled     Boolean @default(false)
+
+  sellerId    String  @db.ObjectId
+  seller      Seller  @relation(fields: [sellerId], references: [id])
   orders      Order[]
-  published   Boolean @default(false)
 }
 
 model Order {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  email     String
+
   productId String    @db.ObjectId
   product   Product   @relation(fields: [productId], references: [id])
-  email     String
 }

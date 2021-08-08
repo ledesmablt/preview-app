@@ -130,8 +130,20 @@ export async function put(
 
   // TODO: validation for all fields
   const updateBody: Partial<Product> = {}
+  if (rawUpdateBody.name) {
+    updateBody.name = rawUpdateBody.name
+  }
   if (rawUpdateBody.description) {
     updateBody.description = rawUpdateBody.description
+  }
+  if (rawUpdateBody.price) {
+    updateBody.price = rawUpdateBody.price
+  }
+  if (rawUpdateBody.currency) {
+    updateBody.currency = rawUpdateBody.currency
+  }
+  if (rawUpdateBody.enabled) {
+    updateBody.enabled = rawUpdateBody.enabled
   }
   const select = updateBodyToSelect<Product>(updateBody)
 
