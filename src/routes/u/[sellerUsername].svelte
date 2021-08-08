@@ -1,9 +1,12 @@
 <script lang="ts" context="module">
   import type { Load } from '@sveltejs/kit'
+  import type { Seller_Get_Endpoint } from '$lib/types/api'
   export const load: Load = async ({ page, fetch }) => {
     const username = page.params.sellerUsername
-    const res = await fetch(`/api/seller?username=${username}`)
-    const seller = (await res.json()).data
+    const res: Seller_Get_Endpoint = await fetch(
+      `/api/seller?username=${username}`
+    ).then((r) => r.json())
+    const seller = res.data
     if (!seller) {
       return {
         status: 404,
@@ -12,10 +15,7 @@
     }
     return {
       props: {
-        email: seller.email,
-        bio: seller.bio,
-        username: seller.username,
-        userImageUrl: seller.userImageUrl
+        seller
       }
     }
   }
@@ -26,23 +26,25 @@
   import { page } from '$app/stores'
   import { session } from '$lib/stores'
   import { getChangedFields } from '$lib/utils/client'
+  import type {
+    Seller_Get_Data,
+    Seller_Put_Data,
+    Seller_Put_Endpoint
+  } from '$lib/types/api'
 
   $: authorizedForPage =
     $session.seller?.username === $page.params.sellerUsername &&
     $page.params.sellerUsername
 
-  export let email: string
-  export let bio: string
-  export let username: string
-  export let userImageUrl: string
+  export let seller: Seller_Get_Data
 
   let imageInput: HTMLElement
   let isEdit = false
   let isSaving = false
-  let editFormData = {
-    email,
-    bio,
-    username
+  let editFormData: Seller_Put_Data = {
+    email: seller.email,
+    bio: seller.bio,
+    username: seller.username
   }
 
   async function onImageChange(e: any) {
@@ -68,43 +70,40 @@
       reader.readAsDataURL(image)
       reader.onload = (e) => {
         const newImageUrl = e.target?.result as string
-        userImageUrl = newImageUrl
+        seller.userImageUrl = newImageUrl
       }
     } finally {
       e.target.value = ''
     }
   }
   async function onSave() {
-    const changedValues = getChangedFields(editFormData, {
-      email,
-      username,
-      bio
-    })
+    const changedValues = getChangedFields(editFormData, seller)
     if (Object.values(changedValues).filter(Boolean).length === 0) {
       // no changes
       isEdit = false
       return
     }
     isSaving = true
-    await axios.put('/api/seller', changedValues)
-    email = editFormData.email
-    username = editFormData.username
-    bio = editFormData.bio
+    const res = await axios.put<Seller_Put_Endpoint>(
+      '/api/seller',
+      changedValues
+    )
+    seller = { ...seller, ...res.data.data }
     isEdit = false
     isSaving = false
   }
 </script>
 
 <svelte:head>
-  <title>{username}</title>
+  <title>{seller.username}</title>
 </svelte:head>
 
 <div class="flex flex-col float-left items-center mr-8">
-  {#if userImageUrl}
+  {#if seller.userImageUrl}
     <img
       class="userImage"
-      src={userImageUrl}
-      alt={`${username} display picture`}
+      src={seller.userImageUrl}
+      alt={`${seller.username} display picture`}
     />
   {:else}
     <div class="userImage bg-gray-300" />
@@ -132,10 +131,10 @@
 <div>
   <div class="flex flex-col max-w-md">
     {#if !isEdit}
-      <p>{username}</p>
-      <p>{email}</p>
-      {#if bio}
-        <p>{bio}</p>
+      <p>{seller.username}</p>
+      <p>{seller.email}</p>
+      {#if seller.bio}
+        <p>{seller.bio}</p>
       {/if}
     {:else}
       <input class="editField" bind:value={editFormData.username} />
@@ -169,7 +168,7 @@
   {/if}
 </div>
 
-<style>
+<style lang="postcss">
   .userImage {
     @apply w-24 h-24 rounded-full object-cover;
   }

@@ -3,11 +3,14 @@ import prisma from '$lib/services/prisma'
 import { publicBucket } from '$lib/services/storage'
 import { updateBodyToSelect } from '$lib/utils/api'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
+import type { Seller_Get_Endpoint, Seller_Put_Endpoint } from '$lib/types/api'
 
 import type { Seller } from '@prisma/client'
 import { SALT_ROUNDS } from '$lib/constants'
 
-export async function get(req: Request): Promise<EndpointOutput> {
+export async function get(
+  req: Request
+): Promise<EndpointOutput<Seller_Get_Endpoint>> {
   const username = req.query.get('username')
   if (!username) {
     return {
@@ -47,7 +50,9 @@ export async function get(req: Request): Promise<EndpointOutput> {
   }
 }
 
-export async function put(req: Request<Locals>): Promise<EndpointOutput> {
+export async function put(
+  req: Request<Locals>
+): Promise<EndpointOutput<Seller_Put_Endpoint>> {
   const { seller } = req.locals
   if (!seller) {
     return {
