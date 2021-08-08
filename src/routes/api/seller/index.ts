@@ -3,7 +3,11 @@ import prisma from '$lib/services/prisma'
 import { publicBucket } from '$lib/services/storage'
 import { updateBodyToSelect } from '$lib/utils/api'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
-import type { Seller_Get_Endpoint, Seller_Put_Endpoint } from '$lib/types/api'
+import type {
+  Seller_Get_Endpoint,
+  Seller_Put_Body,
+  Seller_Put_Endpoint
+} from '$lib/types/api'
 
 import type { Seller } from '@prisma/client'
 import { SALT_ROUNDS } from '$lib/constants'
@@ -51,7 +55,7 @@ export async function get(
 }
 
 export async function put(
-  req: Request<Locals>
+  req: Request<Locals, Seller_Put_Body>
 ): Promise<EndpointOutput<Seller_Put_Endpoint>> {
   const { seller } = req.locals
   if (!seller) {
@@ -60,7 +64,7 @@ export async function put(
     }
   }
   const { username } = seller
-  const rawUpdateBody = req.body as any
+  const rawUpdateBody = req.body
   const updateBody: Partial<Seller> = {}
 
   // TODO: validate all fields

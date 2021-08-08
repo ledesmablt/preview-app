@@ -6,6 +6,7 @@ import type { Product } from '@prisma/client'
 import type {
   Product_Get_Endpoint,
   Product_Post_Endpoint,
+  Product_Put_Body,
   Product_Put_Endpoint
 } from '$lib/types/api'
 
@@ -99,7 +100,7 @@ export async function post(
 }
 
 export async function put(
-  req: Request<Locals>
+  req: Request<Locals, Product_Put_Body>
 ): Promise<EndpointOutput<Product_Put_Endpoint>> {
   const { seller } = req.locals
   if (!seller) {

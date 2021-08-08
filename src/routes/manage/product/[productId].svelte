@@ -30,13 +30,13 @@
 
 <script lang="ts">
   import axios from 'axios'
-  import type { Product_Put_Endpoint } from '$lib/types/api'
+  import type { Product_Put_Body, Product_Put_Endpoint } from '$lib/types/api'
 
   export let id: string
   export let name: string
   export let description: string
 
-  let formData = {
+  let formData: Product_Put_Body = {
     id,
     name,
     description
