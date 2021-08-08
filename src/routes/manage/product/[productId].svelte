@@ -1,7 +1,7 @@
 <script lang="ts" context="module">
   import type { Load } from '@sveltejs/kit'
   export const load: Load = async ({ page, fetch, session }) => {
-    const res = await fetch(`/api/product?id=${page.params.productId}`).then(
+    const res = await fetch(`/api/products?id=${page.params.productId}`).then(
       (r) => r.json()
     )
     const product = res.data
