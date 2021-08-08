@@ -2,28 +2,24 @@ import bcrypt from 'bcrypt'
 import prisma from '$lib/services/prisma'
 
 import type { Seller } from '@prisma/client'
-import type { Request, Response, EndpointOutput, Locals } from '@sveltejs/kit'
+import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import { signAndAttachCookieToHeader } from '$lib/services/jwt'
 import { validate } from '$lib/utils/validation/signup'
 import { SALT_ROUNDS } from '$lib/constants'
-
-interface Body {
-  username: string
-  email: string
-  password: string
-  confirmPassword: string
-}
+import type {
+  Auth_Signup_Post_Body,
+  Auth_Signup_Post_Endpoint
+} from '$lib/types/api'
 
 export async function post(
-  req: Request<Locals, Body>,
-  res: Response
-): Promise<EndpointOutput> {
-  const { isValid, errors } = validate(req.body)
-  if (!isValid) {
+  req: Request<Locals, Auth_Signup_Post_Body>
+): Promise<EndpointOutput<Auth_Signup_Post_Endpoint>> {
+  const { errors: validationErrors } = validate(req.body)
+  if (validationErrors) {
     return {
       status: 400,
       body: {
-        errors: errors as any
+        errors: validationErrors
       }
     }
   }

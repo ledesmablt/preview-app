@@ -3,6 +3,8 @@
   import { session } from '$lib/stores'
   import { onMount } from 'svelte'
   import axios from 'axios'
+  import type { Auth_Login_Post_Endpoint } from '$lib/types/api'
+
   $: authorized = $session.seller
 
   onMount(() => {
@@ -17,9 +19,12 @@
   }
   let submissionError: string = ''
 
-  async function onSubmit(e: Event) {
+  async function onSubmit() {
     try {
-      const res = await axios.post('/api/auth/login', formData)
+      const res = await axios.post<Auth_Login_Post_Endpoint>(
+        '/api/auth/login',
+        formData
+      )
       $session = { seller: res.data.data }
       goto('/manage')
     } catch (err) {
@@ -47,7 +52,7 @@
   </form>
 {/if}
 
-<style>
+<style lang="postcss">
   form {
     @apply flex flex-1 flex-col max-w-md;
   }

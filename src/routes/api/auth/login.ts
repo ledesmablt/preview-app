@@ -2,14 +2,17 @@ import bcrypt from 'bcrypt'
 import prisma from '$lib/services/prisma'
 
 import type { Seller } from '@prisma/client'
-import type { Request, Response, EndpointOutput } from '@sveltejs/kit'
+import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import { signAndAttachCookieToHeader } from '$lib/services/jwt'
+import type {
+  Auth_Login_Post_Body,
+  Auth_Login_Post_Endpoint
+} from '$lib/types/api'
 
 export async function post(
-  req: Request,
-  res: Response
-): Promise<EndpointOutput> {
-  const { emailOrUsername, password } = req.body as any
+  req: Request<Locals, Auth_Login_Post_Body>
+): Promise<EndpointOutput<Auth_Login_Post_Endpoint>> {
+  const { emailOrUsername, password = '' } = req.body
   let seller: Seller
   try {
     seller = await prisma.seller.findFirst({

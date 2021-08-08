@@ -4,6 +4,10 @@
   import { onMount } from 'svelte'
   import { validate } from '$lib/utils/validation/signup'
   import type { Validation } from '$lib/utils/validation/signup'
+  import type {
+    Auth_Signup_Post_Body,
+    Auth_Signup_Post_Endpoint
+  } from '$lib/types/api'
   import axios from 'axios'
 
   $: authorized = $session.seller
@@ -13,7 +17,7 @@
     }
   })
 
-  let formData = {
+  let formData: Auth_Signup_Post_Body = {
     username: '',
     email: '',
     password: '',
@@ -36,10 +40,13 @@
   $: submitDisabled =
     Object.values(fieldErrors).filter(Boolean).length > 0 || !validation.isValid
 
-  async function onSubmit(e: Event) {
+  async function onSubmit() {
     submissionError = ''
     try {
-      const res = await axios.post('/api/auth/signup', formData)
+      const res = await axios.post<Auth_Signup_Post_Endpoint>(
+        '/api/auth/signup',
+        formData
+      )
       $session = { seller: res.data.data }
       goto('/manage')
     } catch (err) {
@@ -97,7 +104,7 @@
   </form>
 {/if}
 
-<style>
+<style lang="postcss">
   form {
     @apply flex flex-1 flex-col max-w-md;
   }

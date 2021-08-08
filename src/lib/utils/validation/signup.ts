@@ -1,13 +1,13 @@
 import { validateEmail } from './_helpers'
 
-interface ValidationErrors {
+export type ValidationErrors = {
   username?: string
   email?: string
   password?: string
   confirmPassword?: string
 }
 
-export interface Validation {
+export type Validation = {
   errors?: ValidationErrors
   isValid?: boolean
 }
