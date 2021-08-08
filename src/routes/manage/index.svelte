@@ -1,10 +1,11 @@
 <script lang="ts" context="module">
   import type { Load } from '@sveltejs/kit'
+  import type { Product_Get_Endpoint } from '$lib/types/api'
   export const load: Load = async ({ session, fetch }) => {
-    const res = await fetch(`/api/products?sellerId=${session.seller.id}`).then(
-      (r) => r.json()
-    )
-    const products = res.data
+    const res: Product_Get_Endpoint = await fetch(
+      `/api/products?sellerId=${session.seller.id}`
+    ).then((r) => r.json())
+    const products = res.data || []
     return {
       props: {
         products
@@ -17,14 +18,17 @@
   import axios from 'axios'
   import { goto } from '$app/navigation'
   import { session } from '$lib/stores'
-  import type { Product } from '@prisma/client'
+  import type { Product_Get_Data, Product_Post_Endpoint } from '$lib/types/api'
 
-  export let products: Product[] = []
+  export let products: Product_Get_Data = []
   let sellerUsername = $session?.seller?.username
 
   async function onCreateProduct() {
-    const product = await axios.post('/api/product')
-    const productId = product.data.data.id
+    const res = await axios.post<Product_Post_Endpoint>('/api/product')
+    const productId = res.data.data?.id
+    if (!productId) {
+      throw new Error('Something went wrong!')
+    }
     goto(`/manage/product/${productId}`)
   }
 </script>

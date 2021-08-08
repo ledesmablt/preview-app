@@ -1,12 +1,19 @@
 <script lang="ts" context="module">
   import type { Load } from '@sveltejs/kit'
+  import type { Product_Get_Endpoint } from '$lib/types/api'
   export const load: Load = async ({ page, fetch, session }) => {
-    const res = await fetch(`/api/products?id=${page.params.productId}`).then(
-      (r) => r.json()
-    )
-    const product = res.data
-    // product should be owned by seller
+    const res: Product_Get_Endpoint = await fetch(
+      `/api/products?id=${page.params.productId}`
+    ).then((r) => r.json())
+    const product = (res.data || [])[0]
+
+    if (!product) {
+      return {
+        status: 404
+      }
+    }
     if (session.seller.id !== product.sellerId) {
+      // product should be owned by seller
       return {
         status: 403
       }
@@ -23,6 +30,7 @@
 
 <script lang="ts">
   import axios from 'axios'
+  import type { Product_Put_Endpoint } from '$lib/types/api'
 
   export let id: string
   export let name: string
@@ -35,7 +43,7 @@
   }
   let submissionError = ''
   async function onSubmit() {
-    const res = await axios.put('/api/product', formData)
+    const res = await axios.put<Product_Put_Endpoint>('/api/product', formData)
     console.log(res)
   }
 </script>

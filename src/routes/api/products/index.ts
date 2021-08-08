@@ -3,8 +3,15 @@ import { updateBodyToSelect } from '$lib/utils/api'
 
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type { Product } from '@prisma/client'
+import type {
+  Product_Get_Endpoint,
+  Product_Post_Endpoint,
+  Product_Put_Endpoint
+} from '$lib/types/api'
 
-export async function get(req: Request): Promise<EndpointOutput> {
+export async function get(
+  req: Request
+): Promise<EndpointOutput<Product_Get_Endpoint>> {
   const productId = req.query.get('id')
   const sellerId = req.query.get('sellerId')
   if (!productId && !sellerId) {
@@ -57,11 +64,13 @@ export async function get(req: Request): Promise<EndpointOutput> {
     }
   }
   return {
-    body: { data: { ...product } }
+    body: { data: [{ ...product }] }
   }
 }
 
-export async function post(req: Request<Locals>): Promise<EndpointOutput> {
+export async function post(
+  req: Request<Locals>
+): Promise<EndpointOutput<Product_Post_Endpoint>> {
   // create a draft product
   const { seller } = req.locals
   if (!seller) {
@@ -89,7 +98,9 @@ export async function post(req: Request<Locals>): Promise<EndpointOutput> {
   }
 }
 
-export async function put(req: Request<Locals>): Promise<EndpointOutput> {
+export async function put(
+  req: Request<Locals>
+): Promise<EndpointOutput<Product_Put_Endpoint>> {
   const { seller } = req.locals
   if (!seller) {
     return {
