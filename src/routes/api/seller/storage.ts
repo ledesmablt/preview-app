@@ -1,9 +1,15 @@
 import { publicBucket, privateBucket } from '$lib/services/storage'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
+import type {
+  Seller_Storage_Post_Body,
+  Seller_Storage_Post_Endpoint
+} from '$lib/types/api'
 
 const EXPIRES_SECONDS = 10 * 60
 
-export async function post(req: Request<Locals>): Promise<EndpointOutput> {
+export async function post(
+  req: Request<Locals, Seller_Storage_Post_Body>
+): Promise<EndpointOutput<Seller_Storage_Post_Endpoint>> {
   const { seller } = req.locals
   if (!seller) {
     return {
@@ -39,6 +45,6 @@ export async function post(req: Request<Locals>): Promise<EndpointOutput> {
     expires: new Date().getTime() + EXPIRES_SECONDS * 1000
   })
   return {
-    body: { signedUrl, bucketFilePath }
+    body: { data: { signedUrl, bucketFilePath } }
   }
 }

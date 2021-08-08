@@ -29,7 +29,9 @@
   import type {
     Seller_Get_Data,
     Seller_Put_Body,
-    Seller_Put_Endpoint
+    Seller_Put_Endpoint,
+    Seller_Storage_Post_Body,
+    Seller_Storage_Post_Endpoint
   } from '$lib/types/api'
 
   $: authorizedForPage =
@@ -51,12 +53,16 @@
     e.preventDefault()
     const image: File = e.target?.files[0]
     const contentType = image.type
-    const signedUrlRes = await axios.post('/api/seller/storage', {
+    const body: Seller_Storage_Post_Body = {
       isPublic: true,
       filePath: 'userImage',
       contentType
-    })
-    const { signedUrl } = signedUrlRes.data
+    }
+    const signedUrlRes = await axios.post<Seller_Storage_Post_Endpoint>(
+      '/api/seller/storage',
+      body
+    )
+    const signedUrl = signedUrlRes.data.data?.signedUrl
     try {
       await axios({
         method: 'PUT',
