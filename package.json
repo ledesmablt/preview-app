@@ -12,7 +12,7 @@
     "tailwind:postcss": "postcss src/lib/styles/tailwind.css -o src/lib/styles/tailwind-output.css",
     "tailwind:watch": "TAILWIND_MODE=watch NODE_ENV=development yarn tailwind:postcss -w",
     "tailwind:build": "TAILWIND_MODE=build NODE_ENV=production yarn tailwind:postcss",
-    "dev": "concurrently \"yarn dev:app\" \"yarn tailwind:watch\"",
+    "dev": "concurrently \"yarn dev:app\" \"yarn tailwind:watch\" \"yarn db --browser none\"",
     "build": "yarn tailwind:build && yarn run build:app",
     "gen": "prisma generate",
     "db": "prisma studio"
