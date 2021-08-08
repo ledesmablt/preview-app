@@ -7,11 +7,9 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["mongoDb"]
 }
-
-// TODO: Project model?
 
 model Seller {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
@@ -19,11 +17,24 @@ model Seller {
   email     String    @unique
   password  String
   bio       String?
+  products  Product[]
+}
+
+model Product {
+  id          String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
+  sellerId    String  @db.ObjectId
+  seller      Seller  @relation(fields: [sellerId], references: [id])
+  name        String  @default("new product (draft)")
+  description String?
+  price       Float   @default(1.00)
+  currency    String  @default("USD")
+  orders      Order[]
+  published   Boolean @default(false)
 }
 
 model Order {
   id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
-  firstName String
-  lastName  String
+  productId String    @db.ObjectId
+  product   Product   @relation(fields: [productId], references: [id])
   email     String
 }
