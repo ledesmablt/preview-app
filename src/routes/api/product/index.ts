@@ -6,14 +6,43 @@ import type { Product } from '@prisma/client'
 
 export async function get(req: Request): Promise<EndpointOutput> {
   const productId = req.query.get('id')
-  if (!productId) {
+  const sellerId = req.query.get('sellerId')
+  if (!productId && !sellerId) {
     return {
       status: 400,
       body: {
-        message: 'Missing parameter [id]'
+        message: 'Missing parameter [id | sellerId]'
       }
     }
   }
+
+  // find multiple
+  if (sellerId) {
+    try {
+      const products = await prisma.product.findMany({
+        where: {
+          sellerId
+        }
+      })
+      return {
+        body: {
+          data: products
+        }
+      }
+    } catch (err) {
+      return {
+        status: 404
+      }
+    }
+  }
+
+  if (!productId) {
+    return {
+      status: 400
+    }
+  }
+
+  // find one
   let product: Product
   try {
     product = await prisma.product.findUnique({

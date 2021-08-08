@@ -1,10 +1,25 @@
+<script lang="ts" context="module">
+  import type { Load } from '@sveltejs/kit'
+  export const load: Load = async ({ session, fetch }) => {
+    const res = await fetch(`/api/product?sellerId=${session.seller.id}`).then(
+      (r) => r.json()
+    )
+    const products = res.data
+    return {
+      props: {
+        products
+      }
+    }
+  }
+</script>
+
 <script lang="ts">
   import axios from 'axios'
   import { goto } from '$app/navigation'
   import { session } from '$lib/stores'
   import type { Product } from '@prisma/client'
 
-  let productList: Product[] = []
+  export let products: Product[] = []
   let sellerUsername = $session?.seller?.username
 
   async function onCreateProduct() {
@@ -14,25 +29,27 @@
   }
 </script>
 
-<h1>Manage</h1>
-<p>You're a seller!</p>
+<h1 class="font-medium text-lg">Manage</h1>
 <a
   class="underline hover:text-orange-500 duration-75"
   href={`/u/${sellerUsername}`}
 >
-  My page
+  my page
 </a>
 
 <div class="my-3">
-  <h2>products</h2>
-  {#if productList.length === 0}
+  <h2 class="font-medium">products</h2>
+  {#if products.length === 0}
     <p class="ml-3">
       you don't have any products. click "create new" below to get started!
     </p>
   {:else}
     <ul>
-      {#each productList as product}
-        <li on:click={() => goto(`/manage/product/${product.id}`)}>
+      {#each products as product}
+        <li
+          class="cursor-pointer ml-2"
+          on:click={() => goto(`/manage/product/${product.id}`)}
+        >
           {product.name}
         </li>
       {/each}
@@ -41,7 +58,7 @@
   <button class="createBtn" on:click={onCreateProduct}> create new </button>
 </div>
 
-<style>
+<style lang="postcss">
   .createBtn {
     @apply rounded border border-gray-200 px-2 mt-2;
   }
