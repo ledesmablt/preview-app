@@ -10,7 +10,7 @@ export async function post(
   res: Response
 ): Promise<EndpointOutput> {
   const { emailOrUsername, password } = req.body as any
-  let seller: Seller | null
+  let seller: Seller
   try {
     seller = await prisma.seller.findFirst({
       where: {
@@ -20,11 +20,9 @@ export async function post(
             username: emailOrUsername
           }
         ]
-      }
+      },
+      rejectOnNotFound: true
     })
-    if (!seller) {
-      throw new Error('Seller not found')
-    }
     const validPassword = bcrypt.compareSync(password, seller.password)
     if (!validPassword) {
       throw new Error('Invalid password')

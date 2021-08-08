@@ -16,16 +16,14 @@ export async function get(req: Request): Promise<EndpointOutput> {
       }
     }
   }
-  let seller: Seller | null
+  let seller: Seller
   try {
     seller = await prisma.seller.findFirst({
       where: {
         username
-      }
+      },
+      rejectOnNotFound: true
     })
-    if (!seller) {
-      throw new Error('Seller not found')
-    }
   } catch (err) {
     return {
       status: 404
