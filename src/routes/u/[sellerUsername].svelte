@@ -25,6 +25,7 @@
   import axios from 'axios'
   import { page } from '$app/stores'
   import { session } from '$lib/stores'
+  import { getChangedFields } from '$lib/utils/client'
 
   $: authorizedForPage =
     $session.seller?.username === $page.params.sellerUsername &&
@@ -74,12 +75,11 @@
     }
   }
   async function onSave() {
-    const changedValues = {
-      email: editFormData.email !== email ? editFormData.email : undefined,
-      username:
-        editFormData.username !== username ? editFormData.username : undefined,
-      bio: editFormData.bio !== bio ? editFormData.bio : undefined
-    }
+    const changedValues = getChangedFields(editFormData, {
+      email,
+      username,
+      bio
+    })
     if (Object.values(changedValues).filter(Boolean).length === 0) {
       // no changes
       isEdit = false

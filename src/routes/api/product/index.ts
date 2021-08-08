@@ -1,4 +1,5 @@
 import prisma from '$lib/services/prisma'
+import { updateBodyToSelect } from '$lib/utils/api'
 
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type { Product } from '@prisma/client'
@@ -86,14 +87,12 @@ export async function put(req: Request<Locals>): Promise<EndpointOutput> {
     }
   }
 
+  // TODO: validation for all fields
   const updateBody: Partial<Product> = {}
   if (rawUpdateBody.description) {
     updateBody.description = rawUpdateBody.description
   }
-  const select: Partial<Record<keyof Product, boolean>> = {}
-  for (let key in updateBody) {
-    select[key as keyof Product] = true
-  }
+  const select = updateBodyToSelect<Product>(updateBody)
 
   try {
     const updatedProduct = await prisma.product.update({

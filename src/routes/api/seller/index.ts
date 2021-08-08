@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import prisma from '$lib/services/prisma'
 import { publicBucket } from '$lib/services/storage'
+import { updateBodyToSelect } from '$lib/utils/api'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 
 import type { Seller } from '@prisma/client'
@@ -71,13 +72,7 @@ export async function put(req: Request<Locals>): Promise<EndpointOutput> {
   if (rawUpdateBody.password) {
     updateBody.password = await bcrypt.hash(rawUpdateBody.password, SALT_ROUNDS)
   }
-  const select: Partial<Record<keyof Seller, boolean>> = {}
-  for (let key in updateBody) {
-    if (key === 'password') {
-      continue
-    }
-    select[key as keyof Seller] = true
-  }
+  const select = updateBodyToSelect<Seller>(updateBody)
 
   try {
     const seller = await prisma.seller.update({
