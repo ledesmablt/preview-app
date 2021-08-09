@@ -4,7 +4,7 @@ import type { Seller } from '@prisma/client'
 export type Seller_Get_Data = {
   email: string
   username: string
-  bio?: string | null
+  bio: string
   userImageUrl?: string | null
 }
 export type Seller_Get_Endpoint = JSONBody<Seller_Get_Data>
