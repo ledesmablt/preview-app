@@ -12,7 +12,7 @@
         status: 404
       }
     }
-    if (session.seller.id !== product.sellerId) {
+    if (session.seller?.id !== product.sellerId) {
       // product should be owned by seller
       return {
         status: 403

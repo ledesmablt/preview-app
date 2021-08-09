@@ -3,7 +3,7 @@
   import type { Product_Get_Endpoint } from '$lib/types/api'
   export const load: Load = async ({ session, fetch }) => {
     const res: Product_Get_Endpoint = await fetch(
-      `/api/products?sellerId=${session.seller.id}`
+      `/api/products?sellerId=${session.seller?.id}`
     ).then((r) => r.json())
     const products = res.data || []
     return {

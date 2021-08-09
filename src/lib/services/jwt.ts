@@ -1,6 +1,6 @@
 import * as cookie from 'cookie'
 import jwt from 'jsonwebtoken'
-import type { Request } from '@sveltejs/kit'
+import type { Request, Locals } from '@sveltejs/kit'
 import type { Headers } from '@sveltejs/kit/types/helper'
 import type { Seller } from '@prisma/client'
 
@@ -34,7 +34,7 @@ function getTokenFromRequest({ headers }: Request): string {
   }
 }
 
-export async function isLoggedIn(req: Request): Promise<Seller | null> {
+export async function isLoggedIn(req: Request<Locals>): Promise<Seller | null> {
   const token = getTokenFromRequest(req)
   let payload: TokenPayload
   try {
@@ -42,6 +42,9 @@ export async function isLoggedIn(req: Request): Promise<Seller | null> {
   } catch (e) {
     // TODO: handle token refresh
     return null
+  }
+  if (req.locals.seller) {
+    return req.locals.seller
   }
   const seller = await prisma.seller.findFirst({
     where: {
