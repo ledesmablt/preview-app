@@ -73,7 +73,7 @@
   />
   <div class="flex">
     <div class="flex flex-col flex-grow mr-2">
-      <label for="price">base price</label>
+      <label for="price">base price*</label>
       <input
         class="inputField"
         name="price"
@@ -102,7 +102,9 @@
     />
   </div>
 
-  <br />
+  <div class="text-xs mt-2 mb-4 italic">
+    <p>* users have the option to pay more than the price you set</p>
+  </div>
   <button class="submit" class:cursor-wait={isSaving} disabled={isSaving}>
     {isSaving ? 'saving...' : 'save'}
   </button>

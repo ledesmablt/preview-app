@@ -1,5 +1,6 @@
 <script lang="ts">
   import '$lib/styles/tailwind-output.css'
+  import '$lib/styles/global.css'
   import Nav from '$lib/components/Nav.svelte'
 </script>
 
