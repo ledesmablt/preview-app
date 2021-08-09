@@ -1,4 +1,5 @@
 import prisma from '$lib/services/prisma'
+import { publicBucket } from '$lib/services/storage'
 import { updateBodyToSelect } from '$lib/utils/api'
 
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
@@ -9,6 +10,18 @@ import type {
   Product_Put_Body,
   Product_Put_Endpoint
 } from '$lib/types/api'
+
+async function withImageUrl(
+  product: Product
+): Promise<Product & { imageUrl: string | null }> {
+  const [[file]] = await publicBucket.getFiles({
+    prefix: `products/${product.id}/displayImage`
+  })
+  return {
+    ...product,
+    imageUrl: file ? file.publicUrl() : null
+  }
+}
 
 export async function get(
   req: Request
@@ -32,9 +45,10 @@ export async function get(
           sellerId
         }
       })
+      const productsWithImage = await Promise.all(products.map(withImageUrl))
       return {
         body: {
-          data: products
+          data: productsWithImage
         }
       }
     } catch (err) {
@@ -64,8 +78,9 @@ export async function get(
       status: 404
     }
   }
+  const productWithImage = await withImageUrl(product)
   return {
-    body: { data: [{ ...product }] }
+    body: { data: [productWithImage] }
   }
 }
 
@@ -143,7 +158,7 @@ export async function put(
     updateBody.currency = rawUpdateBody.currency
   }
   if (rawUpdateBody.enabled) {
-    updateBody.enabled = rawUpdateBody.enabled
+    updateBody.enabled = rawUpdateBody.currency
   }
   const select = updateBodyToSelect<Product>(updateBody)
 

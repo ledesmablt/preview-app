@@ -28,6 +28,7 @@
 
 <script lang="ts">
   import axios from 'axios'
+  import FileUpload from '$lib/components/FileUpload.svelte'
   import type {
     Product_Get_Data_Element,
     Product_Put_Body,
@@ -43,6 +44,7 @@
     currency: product.currency,
     enabled: product.enabled
   }
+  export let imageUrl = product.imageUrl
   let submissionError = ''
   let isSaving = false
 
@@ -58,6 +60,18 @@
       submissionError = err.response.data.message
     } finally {
       isSaving = false
+    }
+  }
+  async function onDeleteImage() {
+    try {
+      await axios.delete(`/api/products/storage/image`, {
+        data: {
+          id: product.id
+        }
+      })
+      imageUrl = null
+    } catch (err) {
+      submissionError = err.response.data.message
     }
   }
 </script>
@@ -92,6 +106,27 @@
       />
     </div>
   </div>
+  <div class="mb-6">
+    {#if imageUrl}
+      <img src={imageUrl} alt="product" />
+    {/if}
+    <div class="flex space-x-2">
+      <div class="editBtn">
+        <FileUpload
+          endpoint="/api/products/storage/image"
+          body={{ id: product.id }}
+          onImageUploadComplete={(newImageUrl) => {
+            imageUrl = newImageUrl
+          }}
+        >
+          upload image
+        </FileUpload>
+      </div>
+      {#if imageUrl}
+        <button on:click|preventDefault={onDeleteImage}>delete image</button>
+      {/if}
+    </div>
+  </div>
   <div class="flex items-center">
     <label for="enabled">enabled?</label>
     <input
@@ -122,6 +157,9 @@
     @apply border rounded px-2 py-1 mb-2 text-sm;
   }
 
+  .editBtn {
+    @apply rounded border border-gray-200 px-2 mt-2;
+  }
   .submit {
     @apply rounded bg-orange-300 w-max py-1 px-5 hover:bg-orange-500;
   }
