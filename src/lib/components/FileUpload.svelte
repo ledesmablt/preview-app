@@ -4,15 +4,24 @@
   export let isUploading: boolean = false
   export let body: Record<string, any> = {}
   export let endpoint: string
-  export let onImageUploadComplete: (newImageUrl: string) => any = () => {}
+  export let onImagePreview: (previewImageUrl: string) => any = () => {}
+  let event: any
 
   let imageInput: HTMLElement
   type Response = { data?: { signedUrl?: string } }
 
-  async function onFileChange(e: any) {
+  export async function saveImage() {
+    if (!event?.target) {
+      // return if no file
+      return
+    }
+
     isUploading = true
-    e.preventDefault()
-    const file: File = e.target?.files[0]
+    const file = event.target?.files[0]
+    if (!file) {
+      isUploading = false
+      return
+    }
     const contentType = file.type
     try {
       const signedUrlRes = await axios.put<Response>(endpoint, {
@@ -32,19 +41,26 @@
           'Cache-Control': 'no-cache, max-age=0'
         }
       })
-      if (contentType.split('/')[0] === 'image') {
-        let reader = new FileReader()
-        reader.readAsDataURL(file)
-        reader.onload = (e) => {
-          const newImageUrl = e.target?.result as string
-          onImageUploadComplete(newImageUrl)
-        }
-      }
     } catch (err) {
       console.error(err)
     } finally {
-      e.target.value = ''
+      event.target.value = ''
       isUploading = false
+    }
+  }
+
+  async function onFileChange(e: any) {
+    e.preventDefault()
+    event = e
+    const file = event.target?.files[0]
+    const contentType = file.type
+    if (contentType.split('/')[0] === 'image') {
+      let reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = (e) => {
+        const previewImageUrl = e.target?.result as string
+        onImagePreview(previewImageUrl)
+      }
     }
   }
 </script>

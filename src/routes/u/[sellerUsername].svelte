@@ -40,6 +40,7 @@
 
   export let seller: Seller_Get_Data
 
+  let userImageUrl = seller.userImageUrl
   let isEditing = false
   let isSaving = false
   let editFormData: Seller_Put_Body = {
@@ -47,8 +48,13 @@
     bio: seller.bio,
     username: seller.username
   }
+  let saveImage: any
 
   async function onSave() {
+    // save image & override local value
+    await saveImage()
+    seller.userImageUrl = userImageUrl
+
     const changedValues = getChangedFields(editFormData, seller)
     if (Object.values(changedValues).filter(Boolean).length === 0) {
       // no changes
@@ -71,25 +77,26 @@
 </svelte:head>
 
 <div class="flex flex-col float-left items-center mr-8">
-  {#if seller.userImageUrl}
+  {#if userImageUrl}
     <img
       class="userImage"
-      src={seller.userImageUrl}
+      src={userImageUrl}
       alt={`${seller.username} display picture`}
     />
   {:else}
     <div class="userImage bg-gray-300" />
   {/if}
-  {#if authorizedForPage}
+  {#if authorizedForPage && isEditing}
     <div class="editBtn">
       <FileUpload
         endpoint="/api/seller/storage/image"
         body={{
           filePath: 'userImage'
         }}
-        onImageUploadComplete={(newImageUrl) => {
-          seller.userImageUrl = newImageUrl
+        onImagePreview={(previewImageUrl) => {
+          userImageUrl = previewImageUrl
         }}
+        bind:saveImage
       >
         change
       </FileUpload>
@@ -120,6 +127,10 @@
         disabled={isSaving}
         on:click={() => {
           isEditing = !isEditing
+          if (!isEditing) {
+            // on cancel reset image
+            userImageUrl = seller.userImageUrl
+          }
         }}
       >
         {isEditing ? 'cancel' : 'edit'}

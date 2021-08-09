@@ -29,6 +29,7 @@
 <script lang="ts">
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
+  import { getChangedFields } from '$lib/utils/client'
   import type {
     Product_Get_Data_Element,
     Product_Put_Body,
@@ -47,17 +48,32 @@
   export let imageUrl = product.imageUrl
   let submissionError = ''
   let isSaving = false
+  let isUploading: boolean
+  let saveImage: any
 
   async function onSubmit() {
     isSaving = true
     try {
+      // upload image
+      await saveImage()
+
+      const changedValues = getChangedFields(formData, product)
+      if (
+        Object.values(changedValues).filter(
+          (v) => v !== undefined && v !== null
+        ).length === 0
+      ) {
+        // no changes
+        isSaving = false
+        return
+      }
       const res = await axios.put<Product_Put_Endpoint>(
         '/api/products',
         formData
       )
       formData = { ...formData, ...res.data.data }
     } catch (err) {
-      submissionError = err.response.data.message
+      submissionError = err.response?.data?.message || err
     } finally {
       isSaving = false
     }
@@ -115,15 +131,19 @@
         <FileUpload
           endpoint="/api/products/storage/image"
           body={{ id: product.id }}
-          onImageUploadComplete={(newImageUrl) => {
-            imageUrl = newImageUrl
+          onImagePreview={(previewImageUrl) => {
+            imageUrl = previewImageUrl
           }}
+          bind:isUploading
+          bind:saveImage
         >
           upload image
         </FileUpload>
       </div>
       {#if imageUrl}
-        <button on:click|preventDefault={onDeleteImage}>delete image</button>
+        <button class="editBtn" on:click|preventDefault={onDeleteImage}>
+          delete image
+        </button>
       {/if}
     </div>
   </div>

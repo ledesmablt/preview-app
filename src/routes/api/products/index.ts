@@ -157,8 +157,8 @@ export async function put(
   if (rawUpdateBody.currency) {
     updateBody.currency = rawUpdateBody.currency
   }
-  if (rawUpdateBody.enabled) {
-    updateBody.enabled = rawUpdateBody.currency
+  if (typeof rawUpdateBody.enabled === 'boolean') {
+    updateBody.enabled = rawUpdateBody.enabled
   }
   const select = updateBodyToSelect<Product>(updateBody)
 
