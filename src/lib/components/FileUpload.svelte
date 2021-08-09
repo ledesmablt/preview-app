@@ -1,0 +1,66 @@
+<script lang="ts">
+  import axios from 'axios'
+
+  export let isUploading: boolean = false
+  export let body: Record<string, any> = {}
+  export let endpoint: string
+  export let onImageUploadComplete: (newImageUrl: string) => any = () => {}
+
+  let imageInput: HTMLElement
+  type Response = { data?: { signedUrl?: string } }
+
+  async function onFileChange(e: any) {
+    isUploading = true
+    e.preventDefault()
+    const file: File = e.target?.files[0]
+    const contentType = file.type
+    try {
+      const signedUrlRes = await axios.put<Response>(endpoint, {
+        ...body,
+        contentType
+      })
+      const signedUrl = signedUrlRes.data.data?.signedUrl
+      if (!signedUrl) {
+        throw new Error('API did not return signedUrl')
+      }
+      await axios({
+        method: 'PUT',
+        url: signedUrl,
+        data: file,
+        headers: {
+          'Content-Type': contentType,
+          'Cache-Control': 'no-cache, max-age=0'
+        }
+      })
+      if (contentType.split('/')[0] === 'image') {
+        let reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onload = (e) => {
+          const newImageUrl = e.target?.result as string
+          onImageUploadComplete(newImageUrl)
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      e.target.value = ''
+      isUploading = false
+    }
+  }
+</script>
+
+<div
+  on:click={() => {
+    imageInput.click()
+  }}
+>
+  <label class="cursor-pointer" for="fileUpload"><slot /></label>
+  <input
+    type="file"
+    name="fileUpload"
+    accept=".jpg, .jpeg, .png"
+    class="hidden"
+    bind:this={imageInput}
+    on:change={onFileChange}
+  />
+</div>

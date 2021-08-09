@@ -13,10 +13,14 @@ async function configureStorage() {
   const corsConfig = {
     method: ['DELETE', 'GET', 'HEAD', 'POST', 'PUT'],
     origin: ['*'],
-    responseHeader: ['Content-Type'],
+    responseHeader: ['Content-Type', 'Cache-Control'],
     maxAgeSeconds: 3600
   }
   await Promise.all([
+    // public bucket should be public
+    publicBucket.makePublic(),
+
+    // cors
     publicBucket.setCorsConfiguration([corsConfig]),
     privateBucket.setCorsConfiguration([corsConfig])
   ])

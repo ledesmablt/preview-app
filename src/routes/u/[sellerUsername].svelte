@@ -26,12 +26,12 @@
   import { page } from '$app/stores'
   import { session } from '$lib/stores'
   import { getChangedFields } from '$lib/utils/client'
+  import FileUpload from '$lib/components/FileUpload.svelte'
+
   import type {
     Seller_Get_Data,
     Seller_Put_Body,
-    Seller_Put_Endpoint,
-    Seller_Storage_Post_Body,
-    Seller_Storage_Post_Endpoint
+    Seller_Put_Endpoint
   } from '$lib/types/api'
 
   $: authorizedForPage =
@@ -40,7 +40,6 @@
 
   export let seller: Seller_Get_Data
 
-  let imageInput: HTMLElement
   let isEditing = false
   let isSaving = false
   let editFormData: Seller_Put_Body = {
@@ -49,39 +48,6 @@
     username: seller.username
   }
 
-  async function onImageChange(e: any) {
-    e.preventDefault()
-    const image: File = e.target?.files[0]
-    const contentType = image.type
-    const body: Seller_Storage_Post_Body = {
-      isPublic: true,
-      filePath: 'userImage',
-      contentType
-    }
-    const signedUrlRes = await axios.post<Seller_Storage_Post_Endpoint>(
-      '/api/seller/storage',
-      body
-    )
-    const signedUrl = signedUrlRes.data.data?.signedUrl
-    try {
-      await axios({
-        method: 'PUT',
-        url: signedUrl,
-        data: image,
-        headers: {
-          'Content-Type': contentType
-        }
-      })
-      let reader = new FileReader()
-      reader.readAsDataURL(image)
-      reader.onload = (e) => {
-        const newImageUrl = e.target?.result as string
-        seller.userImageUrl = newImageUrl
-      }
-    } finally {
-      e.target.value = ''
-    }
-  }
   async function onSave() {
     const changedValues = getChangedFields(editFormData, seller)
     if (Object.values(changedValues).filter(Boolean).length === 0) {
@@ -114,22 +80,19 @@
   {:else}
     <div class="userImage bg-gray-300" />
   {/if}
-  {#if authorizedForPage && isEditing}
-    <div
-      class="editBtn"
-      on:click={() => {
-        imageInput.click()
-      }}
-    >
-      <label class="cursor-pointer" for="userImageUpload">change</label>
-      <input
-        type="file"
-        name="userImageUpload"
-        accept=".jpg, .jpeg, .png"
-        class="hidden"
-        bind:this={imageInput}
-        on:change={onImageChange}
-      />
+  {#if authorizedForPage}
+    <div class="editBtn">
+      <FileUpload
+        endpoint="/api/seller/storage/image"
+        body={{
+          filePath: 'userImage'
+        }}
+        onImageUploadComplete={(newImageUrl) => {
+          seller.userImageUrl = newImageUrl
+        }}
+      >
+        change
+      </FileUpload>
     </div>
   {/if}
 </div>
