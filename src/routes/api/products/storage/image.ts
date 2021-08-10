@@ -1,5 +1,5 @@
-import prisma from '$lib/services/prisma'
 import { publicBucket } from '$lib/services/storage'
+import { sellerOwnsProduct } from '$lib/utils/api'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type {
   ProductStorageImage_Put_Body,
@@ -29,15 +29,7 @@ export async function put(
     }
   }
   try {
-    const product = await prisma.product.findUnique({
-      where: {
-        id
-      },
-      rejectOnNotFound: true
-    })
-    if (product.sellerId !== seller.id) {
-      throw new Error('Product does not exist under your seller account.')
-    }
+    await sellerOwnsProduct(seller, id)
   } catch (err) {
     return {
       status: 404,
@@ -79,15 +71,7 @@ export async function del(
     }
   }
   try {
-    const product = await prisma.product.findUnique({
-      where: {
-        id
-      },
-      rejectOnNotFound: true
-    })
-    if (product.sellerId !== seller.id) {
-      throw new Error('Product does not exist under your seller account.')
-    }
+    await sellerOwnsProduct(seller, id)
   } catch (err) {
     return {
       status: 404,

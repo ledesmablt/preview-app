@@ -1,5 +1,6 @@
 <script lang="ts">
   import axios from 'axios'
+  import { NO_CACHE } from '$lib/constants'
 
   export let isUploading: boolean = false
   export let body: Record<string, any> = {}
@@ -38,7 +39,7 @@
         data: file,
         headers: {
           'Content-Type': contentType,
-          'Cache-Control': 'no-cache, max-age=0'
+          'Cache-Control': NO_CACHE
         }
       })
     } catch (err) {

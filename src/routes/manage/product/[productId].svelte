@@ -79,6 +79,7 @@
     }
   }
   async function onDeleteImage() {
+    // TODO: fire only on save, give option to cancel
     try {
       await axios.delete(`/api/products/storage/image`, {
         data: {

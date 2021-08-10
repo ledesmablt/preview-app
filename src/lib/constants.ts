@@ -9,3 +9,5 @@ export const DEFAULT_COOKIE: CookieOptions = {
   httpOnly: true,
   path: '/'
 }
+
+export const NO_CACHE = 'no-cache, max-age=0'
