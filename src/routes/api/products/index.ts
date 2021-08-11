@@ -11,15 +11,24 @@ import type {
   Product_Put_Endpoint
 } from '$lib/types/api'
 
-async function withImageUrl(
+type ProductStorageUrls = {
+  imageUrl: string | null
+  audioPreviewUrl: string | null
+}
+
+async function withStorageUrls(
   product: Product
-): Promise<Product & { imageUrl: string | null }> {
-  const [[file]] = await publicBucket.getFiles({
-    prefix: `products/${product.id}/displayImage`
-  })
+): Promise<Product & ProductStorageUrls> {
+  const displayImage = publicBucket.file(`products/${product.id}/displayImage`)
+  const audioPreview = publicBucket.file(`products/${product.id}/audioPreview`)
+  const [[imageExists], [previewExists]] = await Promise.all([
+    displayImage.exists(),
+    audioPreview.exists()
+  ])
   return {
     ...product,
-    imageUrl: file ? file.publicUrl() : null
+    imageUrl: imageExists ? displayImage.publicUrl() : null,
+    audioPreviewUrl: previewExists ? audioPreview.publicUrl() : null
   }
 }
 
@@ -45,10 +54,12 @@ export async function get(
           sellerId
         }
       })
-      const productsWithImage = await Promise.all(products.map(withImageUrl))
+      const productsWithStorageUrls = await Promise.all(
+        products.map(withStorageUrls)
+      )
       return {
         body: {
-          data: productsWithImage
+          data: productsWithStorageUrls
         }
       }
     } catch (err) {
@@ -78,7 +89,7 @@ export async function get(
       status: 404
     }
   }
-  const productWithImage = await withImageUrl(product)
+  const productWithImage = await withStorageUrls(product)
   return {
     body: { data: [productWithImage] }
   }

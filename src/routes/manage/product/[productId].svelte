@@ -46,16 +46,21 @@
     enabled: product.enabled
   }
   export let imageUrl = product.imageUrl
+  export let previewAudioUrl = product.audioPreviewUrl
   let submissionError = ''
   let isSaving = false
   let isUploading: boolean
   let saveImage: any
+  let saveAudio: any
 
   async function onSubmit() {
     isSaving = true
     try {
       // upload image
       await saveImage()
+
+      // upload audio
+      await saveAudio()
 
       const changedValues = getChangedFields(formData, product)
       if (
@@ -122,6 +127,21 @@
         bind:value={formData.currency}
       />
     </div>
+  </div>
+  <div class="mb-2 flex space-x-2">
+    <div class="editBtn">
+      <FileUpload
+        endpoint="/api/products/storage/audio/preview"
+        fileType="audio"
+        body={{ id: product.id }}
+        bind:saveImage={saveAudio}
+      >
+        upload preview audio
+      </FileUpload>
+    </div>
+    {#if previewAudioUrl}
+      <button class="editBtn">delete preview audio</button>
+    {/if}
   </div>
   <div class="mb-6">
     {#if imageUrl}

@@ -6,6 +6,12 @@
   export let body: Record<string, any> = {}
   export let endpoint: string
   export let onImagePreview: (previewImageUrl: string) => any = () => {}
+  export let fileType = 'image'
+  const fileExtensions: Record<string, string> = {
+    image: '.jpg, .jpeg, .png',
+    audio: '.m4a, .mp3, .wav, .aac, .flac'
+  }
+  fileExtensions.audioOrZip = fileExtensions.audio + ', .zip, .rar'
   let event: any
 
   let imageInput: HTMLElement
@@ -75,7 +81,7 @@
   <input
     type="file"
     name="fileUpload"
-    accept=".jpg, .jpeg, .png"
+    accept={fileExtensions[fileType]}
     class="hidden"
     bind:this={imageInput}
     on:change={onFileChange}
