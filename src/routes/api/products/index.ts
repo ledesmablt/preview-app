@@ -1,5 +1,5 @@
 import prisma from '$lib/services/prisma'
-import { publicBucket } from '$lib/services/storage'
+import { publicBucket, privateBucket } from '$lib/services/storage'
 import { updateBodyToSelect, sellerOwnsProduct } from '$lib/utils/api'
 
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
@@ -14,6 +14,7 @@ import type {
 type ProductStorageUrls = {
   imageUrl: string | null
   audioPreviewUrl: string | null
+  audioProductUrl: string | null
 }
 
 async function withStorageUrls(
@@ -21,14 +22,17 @@ async function withStorageUrls(
 ): Promise<Product & ProductStorageUrls> {
   const displayImage = publicBucket.file(`products/${product.id}/displayImage`)
   const audioPreview = publicBucket.file(`products/${product.id}/audioPreview`)
-  const [[imageExists], [previewExists]] = await Promise.all([
+  const audioProduct = privateBucket.file(`products/${product.id}/audioProduct`)
+  const [[imageExists], [previewExists], [productExists]] = await Promise.all([
     displayImage.exists(),
-    audioPreview.exists()
+    audioPreview.exists(),
+    audioProduct.exists()
   ])
   return {
     ...product,
     imageUrl: imageExists ? displayImage.publicUrl() : null,
-    audioPreviewUrl: previewExists ? audioPreview.publicUrl() : null
+    audioPreviewUrl: previewExists ? audioPreview.publicUrl() : null,
+    audioProductUrl: productExists ? audioProduct.publicUrl() : null
   }
 }
 

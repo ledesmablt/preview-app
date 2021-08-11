@@ -5,6 +5,7 @@ import type { Product } from '@prisma/client'
 export type Product_Get_Data_Element = Product & {
   imageUrl: string | null
   audioPreviewUrl: string | null
+  audioProductUrl: string | null
 }
 export type Product_Get_Data = Product_Get_Data_Element[]
 export type Product_Get_Endpoint = JSONBody<Product_Get_Data>
@@ -42,3 +43,17 @@ export type ProductStorageAudioPreview_Delete_Body = {
   id?: string
 }
 export type ProductStorageAudioPreview_Delete_Endpoint = JSONBody<{}>
+
+// product/storage/audio/productFile
+export type ProductStorageAudioProduct_Put_Body = {
+  id?: string
+  contentType?: string
+}
+export type ProductStorageAudioProduct_Put_Endpoint = JSONBody<{
+  signedUrl: string
+  bucketFilePath: string
+}>
+export type ProductStorageAudioProduct_Delete_Body = {
+  id?: string
+}
+export type ProductStorageAudioProduct_Delete_Endpoint = JSONBody<{}>
