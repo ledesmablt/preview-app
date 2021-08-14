@@ -40,7 +40,8 @@
 
   export let seller: Seller_Get_Data
 
-  let userImageUrl = seller.userImageUrl
+  let userImageUrl = seller.userImageUrl || ''
+  let userImageDraftId = ''
   let isEditing = false
   let isSaving = false
   let editFormData: Seller_Put_Body = {
@@ -48,18 +49,15 @@
     bio: seller.bio,
     username: seller.username
   }
-  let saveImage: any
+
+  function resetImage() {
+    userImageUrl = seller.userImageUrl || ''
+  }
 
   async function onSave() {
-    // save image & override local value
-    await saveImage()
-    seller.userImageUrl = userImageUrl
-
     const changedValues = getChangedFields(editFormData, seller)
-    if (Object.values(changedValues).filter(Boolean).length === 0) {
-      // no changes
-      isEditing = false
-      return
+    if (userImageDraftId) {
+      changedValues.userImageDraftId = userImageDraftId
     }
     isSaving = true
     const res = await axios.put<Seller_Put_Endpoint>(
@@ -67,6 +65,8 @@
       changedValues
     )
     seller = { ...seller, ...res.data.data }
+    seller.userImageUrl = userImageUrl
+    userImageDraftId = ''
     isEditing = false
     isSaving = false
   }
@@ -89,14 +89,9 @@
   {#if authorizedForPage && isEditing}
     <div class="editBtn">
       <FileUpload
-        endpoint="/api/seller/storage/image"
-        body={{
-          filePath: 'userImage'
-        }}
-        onImagePreview={(previewImageUrl) => {
-          userImageUrl = previewImageUrl
-        }}
-        bind:saveImage
+        endpoint="/api/seller/storage/userImage"
+        bind:newFileUrl={userImageUrl}
+        bind:fileDraftId={userImageDraftId}
       >
         change
       </FileUpload>
@@ -129,7 +124,7 @@
           isEditing = !isEditing
           if (!isEditing) {
             // on cancel reset image
-            userImageUrl = seller.userImageUrl
+            resetImage()
           }
         }}
       >

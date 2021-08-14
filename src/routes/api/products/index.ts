@@ -2,6 +2,7 @@ import prisma from '$lib/services/prisma'
 import { publicBucket, privateBucket } from '$lib/services/storage'
 import { updateBodyToSelect, sellerOwnsProduct } from '$lib/utils/api'
 
+import type { Bucket } from '@google-cloud/storage'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type { Product } from '@prisma/client'
 import type {
@@ -169,26 +170,67 @@ export async function put(
   }
   const select = updateBodyToSelect<Product>(updateBody)
 
-  try {
-    const updatedProduct = await prisma.product.update({
-      select,
-      where: {
-        id: productId
-      },
-      data: updateBody
-    })
-    return {
-      body: {
-        data: updatedProduct
+  let updatedProduct: Partial<Product> = {}
+  if (Object.keys(select).length > 0) {
+    try {
+      updatedProduct = await prisma.product.update({
+        select,
+        where: {
+          id: productId
+        },
+        data: updateBody
+      })
+    } catch (err) {
+      console.error(err)
+      return {
+        status: 400,
+        body: {
+          message: err.message
+        }
       }
     }
-  } catch (err) {
-    console.error(err)
-    return {
-      status: 400,
-      body: {
-        message: err.message
-      }
+  }
+
+  const replaceIfDraftExists = async (
+    storagePath: string,
+    bucket: Bucket,
+    draftId?: string
+  ) => {
+    if (!draftId) {
+      return
+    }
+    const draftPrefix = `${storagePath}.draft`
+    const draft = bucket.file(`${draftPrefix}-${draftId}`)
+    const [exists] = await draft.exists()
+    if (exists) {
+      await draft.move(storagePath)
+    }
+    await bucket.deleteFiles({
+      prefix: draftPrefix
+    })
+  }
+
+  await Promise.all([
+    replaceIfDraftExists(
+      `products/${productId}/displayImage`,
+      publicBucket,
+      req.body.imageDraftId
+    ),
+    replaceIfDraftExists(
+      `products/${productId}/audioPreview`,
+      publicBucket,
+      req.body.audioPreviewDraftId
+    ),
+    replaceIfDraftExists(
+      `products/${productId}/audioProduct`,
+      privateBucket,
+      req.body.audioProductDraftId
+    )
+  ])
+
+  return {
+    body: {
+      data: updatedProduct
     }
   }
 }

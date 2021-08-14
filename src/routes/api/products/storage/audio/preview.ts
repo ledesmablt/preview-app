@@ -1,5 +1,6 @@
 import { publicBucket } from '$lib/services/storage'
 import { sellerOwnsProduct } from '$lib/utils/api'
+import { v4 as uuid } from 'uuid'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type {
   ProductStorageAudioPreview_Put_Body,
@@ -39,7 +40,9 @@ export async function put(
     }
   }
 
-  const bucketFilePath = `products/${id}/audioPreview`
+  const draftId = uuid()
+  const draftPrefix = `products/${id}/audioPreview.draft`
+  const bucketFilePath = `${draftPrefix}-${draftId}`
   const file = publicBucket.file(bucketFilePath)
   const [signedUrl] = await file.getSignedUrl({
     version: 'v4',
@@ -48,7 +51,7 @@ export async function put(
     expires: new Date().getTime() + EXPIRES_SECONDS * 1000
   })
   return {
-    body: { data: { signedUrl, bucketFilePath } }
+    body: { data: { signedUrl, fileUrl: file.publicUrl(), draftId } }
   }
 }
 

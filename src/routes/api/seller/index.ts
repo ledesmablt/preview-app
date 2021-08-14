@@ -83,24 +83,39 @@ export async function put(
   }
   const select = updateBodyToSelect<Seller>(updateBody)
 
-  try {
-    const seller = await prisma.seller.update({
-      select,
-      where: { username },
-      data: updateBody
-    })
-    return {
-      body: {
-        data: seller
+  let updatedSeller: Partial<Seller> = {}
+  if (Object.keys(select).length > 0) {
+    try {
+      updatedSeller = await prisma.seller.update({
+        select,
+        where: { username },
+        data: updateBody
+      })
+    } catch (err) {
+      console.error(err)
+      return {
+        status: 400,
+        body: {
+          message: err.message
+        }
       }
     }
-  } catch (err) {
-    console.error(err)
-    return {
-      status: 400,
-      body: {
-        message: err.message
-      }
+  }
+
+  if (req.body.userImageDraftId) {
+    const userImageStoragePath = `sellers/${seller.username}/userImage`
+    const draftPrefix = `${userImageStoragePath}.draft`
+    const draftFile = publicBucket.file(
+      `${draftPrefix}-${req.body.userImageDraftId}`
+    )
+    const [exists] = await draftFile.exists()
+    if (exists) {
+      await draftFile.move(userImageStoragePath)
+    }
+  }
+  return {
+    body: {
+      data: updatedSeller
     }
   }
 }

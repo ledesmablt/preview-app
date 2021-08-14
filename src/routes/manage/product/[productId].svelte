@@ -45,37 +45,42 @@
     currency: product.currency,
     enabled: product.enabled
   }
-  export let imageUrl = product.imageUrl
-  export let previewAudioUrl = product.audioPreviewUrl
-  export let productAudioUrl = product.audioProductUrl
+  export let imageUrl = product.imageUrl || ''
+  export let audioPreviewUrl = product.audioPreviewUrl || ''
+  export let audioProductUrl = product.audioProductUrl || ''
+
+  let imageDraftId = ''
+  let audioPreviewDraftId = ''
+  let audioProductDraftId = ''
+
   let submissionError = ''
   let isSaving = false
-  let isUploading: boolean
-  let saveImage: any
-  let saveAudioPreview: any
-  let saveAudioProduct: any
 
   async function onSubmit() {
-    isSaving = true
+    const changedFields: Product_Put_Body = {
+      ...getChangedFields(formData, product),
+      id: product.id
+    }
+    if (imageDraftId) {
+      changedFields.imageDraftId = imageDraftId
+    }
+    if (audioPreviewDraftId) {
+      changedFields.audioPreviewDraftId = audioPreviewDraftId
+    }
+    if (audioProductDraftId) {
+      changedFields.audioProductDraftId = audioProductDraftId
+    }
     try {
-      // upload image, audio & productFile
-      await Promise.all([saveImage(), saveAudioPreview(), saveAudioProduct()])
-
-      const changedValues = getChangedFields(formData, product)
-      if (
-        Object.values(changedValues).filter(
-          (v) => v !== undefined && v !== null
-        ).length === 0
-      ) {
-        // no changes
-        isSaving = false
-        return
-      }
+      isSaving = true
       const res = await axios.put<Product_Put_Endpoint>(
         '/api/products',
-        formData
+        changedFields
       )
       formData = { ...formData, ...res.data.data }
+      // update all storage urls in memory
+      product.imageUrl = imageUrl
+      product.audioPreviewUrl = audioPreviewUrl
+      product.audioProductUrl = audioProductUrl
     } catch (err) {
       submissionError = err.response?.data?.message || err
     } finally {
@@ -90,7 +95,7 @@
           id: product.id
         }
       })
-      imageUrl = null
+      imageUrl = ''
     } catch (err) {
       submissionError = err.response.data.message
     }
@@ -127,33 +132,41 @@
       />
     </div>
   </div>
+  {#if audioProductUrl}
+    <p>{audioProductUrl}</p>
+  {/if}
   <div class="mb-2 flex space-x-2">
     <div class="editBtn">
       <FileUpload
         endpoint="/api/products/storage/audio/product"
         fileType="audioOrZip"
         body={{ id: product.id }}
-        bind:saveImage={saveAudioProduct}
+        bind:newFileUrl={audioProductUrl}
+        bind:fileDraftId={audioProductDraftId}
       >
         upload product file
       </FileUpload>
     </div>
-    {#if productAudioUrl}
+    {#if audioProductUrl}
       <button class="editBtn">delete product audio</button>
     {/if}
   </div>
+  {#if audioPreviewUrl}
+    <p>{audioPreviewUrl}</p>
+  {/if}
   <div class="mb-2 flex space-x-2">
     <div class="editBtn">
       <FileUpload
         endpoint="/api/products/storage/audio/preview"
         fileType="audio"
         body={{ id: product.id }}
-        bind:saveImage={saveAudioPreview}
+        bind:newFileUrl={audioPreviewUrl}
+        bind:fileDraftId={audioPreviewDraftId}
       >
         upload preview audio
       </FileUpload>
     </div>
-    {#if previewAudioUrl}
+    {#if audioPreviewUrl}
       <button class="editBtn">delete preview audio</button>
     {/if}
   </div>
@@ -166,11 +179,8 @@
         <FileUpload
           endpoint="/api/products/storage/image"
           body={{ id: product.id }}
-          onImagePreview={(previewImageUrl) => {
-            imageUrl = previewImageUrl
-          }}
-          bind:isUploading
-          bind:saveImage
+          bind:newFileUrl={imageUrl}
+          bind:fileDraftId={imageDraftId}
         >
           upload image
         </FileUpload>

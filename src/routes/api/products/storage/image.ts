@@ -1,5 +1,6 @@
 import { publicBucket } from '$lib/services/storage'
 import { sellerOwnsProduct } from '$lib/utils/api'
+import { v4 as uuid } from 'uuid'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type {
   ProductStorageImage_Put_Body,
@@ -39,7 +40,9 @@ export async function put(
     }
   }
 
-  const bucketFilePath = `products/${id}/displayImage`
+  const draftId = uuid()
+  const draftPrefix = `products/${id}/displayImage.draft`
+  const bucketFilePath = `${draftPrefix}-${draftId}`
   const file = publicBucket.file(bucketFilePath)
   const [signedUrl] = await file.getSignedUrl({
     version: 'v4',
@@ -47,8 +50,13 @@ export async function put(
     contentType,
     expires: new Date().getTime() + EXPIRES_SECONDS * 1000
   })
+
+  // remove other draft files if any
+  await publicBucket.deleteFiles({
+    prefix: draftPrefix
+  })
   return {
-    body: { data: { signedUrl, bucketFilePath } }
+    body: { data: { signedUrl, fileUrl: file.publicUrl(), draftId } }
   }
 }
 

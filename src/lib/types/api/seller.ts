@@ -9,7 +9,9 @@ export type Seller_Get_Data = {
 }
 export type Seller_Get_Endpoint = JSONBody<Seller_Get_Data>
 
-export type Seller_Put_Body = Partial<Seller>
+export type Seller_Put_Body = Partial<Seller> & {
+  userImageDraftId?: string
+}
 export type Seller_Put_Endpoint = JSONBody<Seller_Put_Body>
 
 export type SellerStorageImage_Put_Body = {
@@ -19,5 +21,6 @@ export type SellerStorageImage_Put_Body = {
 
 export type SellerStorageImage_Put_Endpoint = JSONBody<{
   signedUrl: string
-  bucketFilePath: string
+  fileUrl: string
+  draftId: string
 }>
