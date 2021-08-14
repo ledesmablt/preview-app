@@ -1,6 +1,5 @@
 import { publicBucket } from '$lib/services/storage'
-import { sellerOwnsProduct } from '$lib/utils/api'
-import { v4 as uuid } from 'uuid'
+import { sellerOwnsProduct, handleDraftUpload } from '$lib/utils/api'
 import type { Request, EndpointOutput, Locals } from '@sveltejs/kit'
 import type {
   ProductStorageAudioPreview_Put_Body,
@@ -8,8 +7,6 @@ import type {
   ProductStorageAudioPreview_Delete_Body,
   ProductStorageAudioPreview_Delete_Endpoint
 } from '$lib/types/api'
-
-import { EXPIRES_SECONDS } from '$lib/constants'
 
 export async function put(
   req: Request<Locals, ProductStorageAudioPreview_Put_Body>
@@ -40,18 +37,10 @@ export async function put(
     }
   }
 
-  const draftId = uuid()
   const draftPrefix = `products/${id}/audioPreview.draft`
-  const bucketFilePath = `${draftPrefix}-${draftId}`
-  const file = publicBucket.file(bucketFilePath)
-  const [signedUrl] = await file.getSignedUrl({
-    version: 'v4',
-    action: 'write',
-    contentType,
-    expires: new Date().getTime() + EXPIRES_SECONDS * 1000
-  })
+  const data = await handleDraftUpload(draftPrefix, contentType, publicBucket)
   return {
-    body: { data: { signedUrl, fileUrl: file.publicUrl(), draftId } }
+    body: { data }
   }
 }
 

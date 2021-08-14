@@ -205,9 +205,6 @@ export async function put(
     if (exists) {
       await draft.move(storagePath)
     }
-    await bucket.deleteFiles({
-      prefix: draftPrefix
-    })
   }
 
   await Promise.all([
