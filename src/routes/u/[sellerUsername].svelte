@@ -1,21 +1,30 @@
 <script lang="ts" context="module">
   import type { Load } from '@sveltejs/kit'
-  import type { Seller_Get_Endpoint } from '$lib/types/api'
+  import type {
+    Seller_Get_Endpoint,
+    Product_Get_Endpoint
+  } from '$lib/types/api'
   export const load: Load = async ({ page, fetch }) => {
     const username = page.params.sellerUsername
-    const res: Seller_Get_Endpoint = await fetch(
+    const sellerRes: Seller_Get_Endpoint = await fetch(
       `/api/seller?username=${username}`
     ).then((r) => r.json())
-    const seller = res.data
+    const seller = sellerRes.data
     if (!seller) {
       return {
         status: 404,
         error: new Error(`Seller ${username} not found`)
       }
     }
+
+    const productRes: Product_Get_Endpoint = await fetch(
+      `/api/products?sellerId=${seller?.id}`
+    ).then((r) => r.json())
+    const products = productRes.data || []
     return {
       props: {
-        seller
+        seller,
+        products
       }
     }
   }
@@ -31,7 +40,8 @@
   import type {
     Seller_Get_Data,
     Seller_Put_Body,
-    Seller_Put_Endpoint
+    Seller_Put_Endpoint,
+    Product_Get_Data
   } from '$lib/types/api'
 
   $: authorizedForPage =
@@ -39,6 +49,7 @@
     $page.params.sellerUsername
 
   export let seller: Seller_Get_Data
+  export let products: Product_Get_Data
 
   let userImageUrl = seller.userImageUrl || ''
   let userImageDraftId = ''
@@ -141,6 +152,25 @@
       {/if}
     </div>
   {/if}
+</div>
+
+<h2 class="mt-6 mb-2 text-xl">Products</h2>
+<div>
+  <div class="grid grid-cols-3 gap-y-10 gap-x-6">
+    {#each products as product}
+      <a href={'#'}>
+        <div class="rounded-lg aspect-w-1 aspect-h-1 mb-1">
+          <img
+            class="w-full object-cover hover:opacity-75 "
+            src={product.imageUrl ?? 'NO IMAGE'}
+            alt={product.name}
+          />
+        </div>
+        <h3>{product.name}</h3>
+        <p>{product.price} {product.currency}</p>
+      </a>
+    {/each}
+  </div>
 </div>
 
 <style lang="postcss">
