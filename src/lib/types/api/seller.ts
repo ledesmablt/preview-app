@@ -2,6 +2,7 @@ import type { JSONBody } from './_common'
 import type { Seller } from '@prisma/client'
 
 export type Seller_Get_Data = {
+  id: string
   email: string
   username: string
   bio: string

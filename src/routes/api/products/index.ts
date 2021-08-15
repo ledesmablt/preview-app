@@ -38,7 +38,7 @@ async function withStorageUrls(
 }
 
 export async function get(
-  req: Request
+  req: Request<Locals>
 ): Promise<EndpointOutput<Product_Get_Endpoint>> {
   const productId = req.query.get('id')
   const sellerId = req.query.get('sellerId')
@@ -51,12 +51,17 @@ export async function get(
     }
   }
 
+  const loggedInSeller = req.locals.seller
+  const sellerAuthorized = loggedInSeller?.id !== sellerId
+
   // find multiple
   if (sellerId) {
     try {
       const products = await prisma.product.findMany({
         where: {
-          sellerId
+          sellerId,
+          // only return enabled products if unauthorized
+          enabled: !sellerAuthorized ? true : undefined
         }
       })
       const productsWithStorageUrls = await Promise.all(
@@ -83,9 +88,10 @@ export async function get(
   // find one
   let product: Product
   try {
-    product = await prisma.product.findUnique({
+    product = await prisma.product.findFirst({
       where: {
-        id: productId
+        id: productId,
+        enabled: !sellerAuthorized ? true : undefined
       },
       rejectOnNotFound: true
     })

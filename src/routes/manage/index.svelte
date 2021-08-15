@@ -24,7 +24,7 @@
   let sellerUsername = $session?.seller?.username
 
   async function onCreateProduct() {
-    const res = await axios.post<Product_Post_Endpoint>('/api/product')
+    const res = await axios.post<Product_Post_Endpoint>('/api/products')
     const productId = res.data.data?.id
     if (!productId) {
       throw new Error('Something went wrong!')

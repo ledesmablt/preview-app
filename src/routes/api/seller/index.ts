@@ -38,13 +38,14 @@ export async function get(
     }
   }
 
-  const { email, bio } = seller
+  const { email, bio, id } = seller
   const [[file]] = await publicBucket.getFiles({
     prefix: `sellers/${username}/userImage`
   })
   return {
     body: {
       data: {
+        id,
         email,
         bio,
         username,
