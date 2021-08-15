@@ -18,7 +18,7 @@
     }
 
     const productRes: Product_Get_Endpoint = await fetch(
-      `/api/products?sellerId=${seller?.id}`
+      `/api/products?sellerId=${seller?.id}&shop=true`
     ).then((r) => r.json())
     const products = productRes.data || []
     return {
