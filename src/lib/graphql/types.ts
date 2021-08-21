@@ -128,3 +128,12 @@ export const loginResult: GraphQLObjectType = new GraphQLObjectType({
     }
   })
 })
+
+export const draftUploadFile = new GraphQLObjectType({
+  name: 'DraftUploadFile',
+  fields: {
+    signedUrl: { type: GraphQLString },
+    fileUrl: { type: GraphQLString },
+    draftId: { type: GraphQLString }
+  }
+})

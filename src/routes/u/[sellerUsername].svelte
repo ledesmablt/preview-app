@@ -73,6 +73,13 @@
   export let seller: Seller_Get_Data
   export let products: Product_Get_Data
 
+  const userImageMutation = `mutation ($contentType: String!) {
+    fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
+      signedUrl
+      fileUrl
+      draftId
+    }
+  }`
   let userImageUrl = seller.userImageUrl || ''
   let userImageDraftId = ''
   let isEditing = false
@@ -152,6 +159,7 @@
         endpoint="/api/seller/storage/userImage"
         bind:newFileUrl={userImageUrl}
         bind:fileDraftId={userImageDraftId}
+        mutation={userImageMutation}
       >
         change
       </FileUpload>

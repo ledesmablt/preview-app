@@ -3,16 +3,14 @@
   import { NO_CACHE } from '$lib/constants'
 
   type FileType = 'image' | 'audio' | 'audioOrZip'
-  type Response = {
-    data: { signedUrl: string; fileUrl?: string; draftId?: string }
-  }
 
-  export let endpoint: string
+  export let endpoint: string // TODO: deprecate
   export let newFileUrl: string
   export let isUploading: boolean = false
   export let body: Record<string, any> = {}
   export let fileType: FileType = 'image'
   export let fileDraftId: string = ''
+  export let mutation: string
 
   const fileExtensions: Record<FileType, string> = {
     image: '.jpg, .jpeg, .png',
@@ -32,11 +30,11 @@
     const contentType = file.type
     try {
       isUploading = true
-      const signedUrlRes = await axios.put<Response>(endpoint, {
-        ...body,
-        contentType
+      const signedUrlRes = await axios.post('/graphql', {
+        variables: { ...body, contentType },
+        query: mutation
       })
-      const { signedUrl, fileUrl, draftId } = signedUrlRes.data.data
+      const { signedUrl, fileUrl, draftId } = signedUrlRes.data.data.fileUpload
       if (!signedUrl) {
         throw new Error('API did not return signedUrl')
       }
