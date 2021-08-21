@@ -6,9 +6,13 @@ import { renderGraphiQL } from 'graphql-helix/dist/render-graphiql.js'
 import { shouldRenderGraphiQL } from 'graphql-helix/dist/should-render-graphiql.js'
 
 import { createSchema } from './schema'
-import { isLoggedIn } from '$lib/services/jwt'
+import { isLoggedIn, setTokenAsCookie } from '$lib/services/jwt'
 
 const schemaPromise = createSchema()
+
+export type GraphQLContext = Session & {
+  token?: string
+}
 
 export const respond = async (request: Request<Locals>): Promise<Response> => {
   if (
@@ -28,8 +32,7 @@ export const respond = async (request: Request<Locals>): Promise<Response> => {
   const parameters = getGraphQLParameters(request)
   const result = await processRequest({
     ...parameters,
-    // For example, auth information is put in context for the resolver
-    contextFactory: async (): Promise<Session> => {
+    contextFactory: async (): Promise<GraphQLContext> => {
       const seller = await isLoggedIn(request)
       return {
         seller
@@ -46,6 +49,13 @@ export const respond = async (request: Request<Locals>): Promise<Response> => {
       headers[name] = value
     }
 
+    // login operations
+    if (result.context?.token) {
+      setTokenAsCookie(result.context.token, headers)
+    }
+    if (result.context?.seller) {
+      request.locals.seller = result.context.seller
+    }
     return {
       body: result.payload as any,
       headers,

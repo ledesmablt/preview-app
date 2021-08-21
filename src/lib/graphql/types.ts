@@ -1,5 +1,5 @@
 import type { Product, Seller } from '@prisma/client'
-import type { Session } from '$lib/stores/session'
+import type { GraphQLContext as Context } from './server'
 import {
   GraphQLID,
   GraphQLList,
@@ -10,8 +10,6 @@ import {
 } from 'graphql'
 import prisma from '$lib/services/prisma'
 import { publicBucket, privateBucket } from '$lib/services/storage'
-
-export type Context = Session
 
 export const seller: GraphQLObjectType = new GraphQLObjectType<Seller, Context>(
   {
@@ -115,6 +113,18 @@ export const product: GraphQLObjectType = new GraphQLObjectType<
         })
         return file ? file.publicUrl() : null
       }
+    }
+  })
+})
+
+export const loginResult: GraphQLObjectType = new GraphQLObjectType({
+  name: 'LoginResult',
+  fields: () => ({
+    token: {
+      type: GraphQLString
+    },
+    seller: {
+      type: seller
     }
   })
 })

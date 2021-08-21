@@ -34,7 +34,9 @@ function getTokenFromRequest({ headers }: Request): string {
   }
 }
 
-export async function isLoggedIn(req: Request<Locals>): Promise<Seller | null> {
+export async function isLoggedIn(
+  req: Request<Locals>
+): Promise<Partial<Seller> | null> {
   const token = getTokenFromRequest(req)
   let payload: TokenPayload
   try {
@@ -54,9 +56,13 @@ export async function isLoggedIn(req: Request<Locals>): Promise<Seller | null> {
   return seller
 }
 
+export function setTokenAsCookie(token: string, headers: Headers) {
+  headers['set-cookie'] = cookie.serialize('token', token, DEFAULT_COOKIE)
+}
+
 export function signToken(
   payload: TokenPayload,
-  { duration = '7d', asCookie = false }: SignTokenOptions
+  { duration = '7d', asCookie = false }: SignTokenOptions = {}
 ): string {
   const token = jwt.sign(payload, JWT_SECRET, {
     algorithm: 'HS256',

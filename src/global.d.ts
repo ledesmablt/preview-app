@@ -5,6 +5,6 @@ import type { Seller } from '@prisma/client'
 
 declare module '@sveltejs/kit' {
   export interface Locals {
-    seller?: Seller | null
+    seller?: Partial<Seller> | null
   }
 }
