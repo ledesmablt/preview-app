@@ -4,7 +4,6 @@
 
   type FileType = 'image' | 'audio' | 'audioOrZip'
 
-  export let endpoint: string // TODO: deprecate
   export let newFileUrl: string
   export let isUploading: boolean = false
   export let body: Record<string, any> = {}
