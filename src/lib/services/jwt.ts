@@ -57,7 +57,7 @@ export async function isLoggedIn(
 }
 
 export function setTokenAsCookie(token: string, headers: Headers) {
-  let c = DEFAULT_COOKIE
+  let c = { ...DEFAULT_COOKIE }
   if (token === 'deleted') {
     c.expires = new Date()
   }
