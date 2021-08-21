@@ -56,6 +56,7 @@
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { getChangedFields } from '$lib/utils/client'
+  import { goto } from '$app/navigation'
 
   export let product: any
   let formData = {
@@ -163,17 +164,17 @@
       isSaving = false
     }
   }
-  async function onDeleteImage() {
-    // TODO: fire only on save, give option to cancel
-    try {
-      await axios.delete(`/api/products/storage/image`, {
-        data: {
-          id: product.id
-        }
-      })
-      imageUrl = ''
-    } catch (err) {
-      submissionError = err.response.data.message
+  async function onDelete() {
+    const res = await axios.post('/graphql', {
+      variables: { id: product.id },
+      query: `mutation ($id: String!) {
+        delete_product(id: $id)
+      }`
+    })
+    if (res.data.errors) {
+      submissionError = res.data.errors[0].message
+    } else if (res.data.data.delete_product) {
+      goto('/manage')
     }
   }
 </script>
@@ -264,11 +265,6 @@
           upload image
         </FileUpload>
       </div>
-      {#if imageUrl}
-        <button class="editBtn" on:click|preventDefault={onDeleteImage}>
-          delete image
-        </button>
-      {/if}
     </div>
   </div>
   <div class="flex items-center">
@@ -284,9 +280,19 @@
   <div class="text-xs mt-2 mb-4 italic">
     <p>* users have the option to pay more than the price you set</p>
   </div>
-  <button class="submit" class:cursor-wait={isSaving} disabled={isSaving}>
-    {isSaving ? 'saving...' : 'save'}
-  </button>
+  <div class="flex">
+    <button class="submit" class:cursor-wait={isSaving} disabled={isSaving}>
+      {isSaving ? 'saving...' : 'save'}
+    </button>
+    <button
+      class="ml-2 rounded border border-gray-200 px-4"
+      class:cursor-wait={isSaving}
+      disabled={isSaving}
+      on:click={onDelete}
+    >
+      {isSaving ? 'deleting...' : 'delete'}
+    </button>
+  </div>
   {#if submissionError}
     <span class="error mt-4">Error: {submissionError}</span>
   {/if}

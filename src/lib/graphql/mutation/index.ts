@@ -2,6 +2,7 @@ import { GraphQLObjectType } from 'graphql'
 import update_seller from './update_seller'
 import create_product from './create_product'
 import update_product from './update_product'
+import delete_product from './delete_product'
 import seller_login from './seller_login'
 import seller_signup from './seller_signup'
 import logout from './logout'
@@ -20,6 +21,7 @@ export default new GraphQLObjectType({
     // product
     create_product,
     update_product,
+    delete_product,
     upload_product_draft_display_image,
     upload_product_draft_audio_preview,
     upload_product_draft_audio_product,
