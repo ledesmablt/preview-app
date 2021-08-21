@@ -64,7 +64,7 @@
     $page.params.sellerUsername
 
   export let seller: any
-  export let products: any
+  export let products: any[]
 
   const userImageMutation = `mutation ($contentType: String!) {
     fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
@@ -136,75 +136,77 @@
   <title>{seller.username}</title>
 </svelte:head>
 
-<div class="flex flex-col float-left items-center mr-8">
-  {#if userImageUrl}
-    <img
-      class="userImage"
-      src={userImageUrl}
-      alt={`${seller.username} display picture`}
-    />
-  {:else}
-    <div class="userImage bg-gray-300" />
-  {/if}
-  {#if authorizedForPage && isEditing}
-    <div class="editBtn">
-      <FileUpload
-        endpoint="/api/seller/storage/userImage"
-        bind:newFileUrl={userImageUrl}
-        bind:fileDraftId={userImageDraftId}
-        mutation={userImageMutation}
-      >
-        change
-      </FileUpload>
-    </div>
-  {/if}
-</div>
-
-<div>
-  <div class="flex flex-col max-w-md">
-    {#if !isEditing}
-      <p>{seller.username}</p>
-      <p>{seller.email}</p>
-      {#if seller.bio}
-        <p>{seller.bio}</p>
-      {/if}
+<div class="flex">
+  <div class="flex flex-col float-left items-center mr-8">
+    {#if userImageUrl}
+      <img
+        class="userImage"
+        src={userImageUrl}
+        alt={`${seller.username} display picture`}
+      />
     {:else}
-      <input class="editField" bind:value={editFormData.username} />
-      <input class="editField" bind:value={editFormData.email} />
-      <textarea class="editField" bind:value={editFormData.bio} />
+      <div class="userImage bg-gray-300" />
+    {/if}
+    {#if authorizedForPage && isEditing}
+      <div class="editBtn">
+        <FileUpload
+          endpoint="/api/seller/storage/userImage"
+          bind:newFileUrl={userImageUrl}
+          bind:fileDraftId={userImageDraftId}
+          mutation={userImageMutation}
+        >
+          change
+        </FileUpload>
+      </div>
     {/if}
   </div>
 
-  {#if authorizedForPage}
-    <div>
-      <button
-        class="editBtn"
-        class:cursor-wait={isSaving}
-        disabled={isSaving}
-        on:click={() => {
-          isEditing = !isEditing
-          if (!isEditing) {
-            // on cancel reset image
-            resetImage()
-          }
-        }}
-      >
-        {isEditing ? 'cancel' : 'edit'}
-      </button>
-      {#if isEditing}
-        <button
-          class="editBtn bg-gray-300"
-          class:bg-gray-300={!isSaving}
-          class:cursor-wait={isSaving}
-          disabled={isSaving}
-          on:click={onSave}>{isSaving ? 'saving...' : 'save'}</button
-        >
+  <div>
+    <div class="flex flex-col max-w-md">
+      {#if !isEditing}
+        <p>{seller.username}</p>
+        <p>{seller.email}</p>
+        {#if seller.bio}
+          <p>{seller.bio}</p>
+        {/if}
+      {:else}
+        <input class="editField" bind:value={editFormData.username} />
+        <input class="editField" bind:value={editFormData.email} />
+        <textarea class="editField" bind:value={editFormData.bio} />
       {/if}
     </div>
-  {/if}
+
+    {#if authorizedForPage}
+      <div>
+        <button
+          class="editBtn"
+          class:cursor-wait={isSaving}
+          disabled={isSaving}
+          on:click={() => {
+            isEditing = !isEditing
+            if (!isEditing) {
+              // on cancel reset image
+              resetImage()
+            }
+          }}
+        >
+          {isEditing ? 'cancel' : 'edit'}
+        </button>
+        {#if isEditing}
+          <button
+            class="editBtn bg-gray-300"
+            class:bg-gray-300={!isSaving}
+            class:cursor-wait={isSaving}
+            disabled={isSaving}
+            on:click={onSave}>{isSaving ? 'saving...' : 'save'}</button
+          >
+        {/if}
+      </div>
+    {/if}
+  </div>
 </div>
 
-<h2 class="mt-6 mb-2 text-xl">Products</h2>
+<h2 class="mt-8 mb-2 text-xl">Products</h2>
 <div>
   <div class="grid grid-cols-3 gap-y-10 gap-x-6">
     {#each products as product}
@@ -225,7 +227,7 @@
 
 <style lang="postcss">
   .userImage {
-    @apply w-24 h-24 rounded-full object-cover;
+    @apply w-28 h-28 rounded-full object-cover;
   }
   .editBtn {
     @apply rounded border border-gray-200 px-2 mt-2;
