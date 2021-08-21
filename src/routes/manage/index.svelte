@@ -41,17 +41,22 @@
   import axios from 'axios'
   import { goto } from '$app/navigation'
   import { session } from '$lib/stores'
-  import type { Product_Get_Data, Product_Post_Endpoint } from '$lib/types/api'
 
-  export let products: Product_Get_Data = []
+  export let products: any[] = []
   let sellerUsername = $session?.seller?.username
 
   async function onCreateProduct() {
-    const res = await axios.post<Product_Post_Endpoint>('/api/products')
-    const productId = res.data.data?.id
-    if (!productId) {
-      throw new Error('Something went wrong!')
+    const res = await axios.post('/graphql', {
+      query: `mutation {
+        create_product {
+          id
+        }
+      }`
+    })
+    if (res.data.errors) {
+      throw new Error(res.data.errors[0].message)
     }
+    const productId = res.data.data.create_product.id
     goto(`/manage/product/${productId}`)
   }
 </script>
