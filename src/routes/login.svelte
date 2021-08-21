@@ -20,7 +20,7 @@
 
   async function onSubmit() {
     try {
-      const res = await axios.post('graphql', {
+      const res = await axios.post('/graphql', {
         query: `mutation {
           seller_login(emailOrUsername: "${formData.emailOrUsername}", password: "${formData.password}") {
             token
