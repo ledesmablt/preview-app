@@ -24,15 +24,15 @@
   $: pageUnderManage = $page.path.startsWith('/manage')
 
   async function logOut() {
-    try {
-      await axios.post('/api/auth/logout')
-      $session = {}
-      if (pageUnderManage) {
-        goto('/')
-      }
-    } catch (err) {
-      alert('something went wrong!')
-      console.error(err)
+    const res = await axios.post('/graphql', {
+      query: 'mutation { logout }'
+    })
+    if (res.data.errors) {
+      alert(res.data.errors[0].message)
+    }
+    $session = {}
+    if (pageUnderManage) {
+      goto('/')
     }
   }
 

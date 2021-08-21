@@ -1,11 +1,34 @@
 <script lang="ts" context="module">
   import type { Load } from '@sveltejs/kit'
-  import type { Product_Get_Endpoint } from '$lib/types/api'
   export const load: Load = async ({ session, fetch }) => {
-    const res: Product_Get_Endpoint = await fetch(
-      `/api/products?sellerId=${session.seller?.id}`
-    ).then((r) => r.json())
-    const products = res.data || []
+    const res = await fetch('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        variables: { username: session.seller?.username },
+        query: `query ($username: String!) {
+          get_seller(username: $username) {
+            products {
+              id
+              name
+              price
+              currency
+              enabled
+              imageUrl
+            }
+          }
+        }`
+      })
+    }).then((r) => r.json())
+    if (res.errors) {
+      return {
+        status: 400,
+        error: new Error(res.errors[0].message)
+      }
+    }
+    const products = res.data.get_seller?.products || []
     return {
       props: {
         products

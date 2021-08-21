@@ -7,19 +7,13 @@ interface Args {
   resolve: any
 }
 
-const AUTH_IGNORE_ROUTES = ['/api/auth']
-
 // fires after every page render / server request
 export async function handle({
   request,
   resolve
 }: Args): Promise<EndpointOutput> {
-  if (request.path === '/api/auth/logout') {
-    const response = await resolve(request)
-    request.locals.seller = null
-    return response
-  }
-  if (AUTH_IGNORE_ROUTES.some((v) => request.path.startsWith(v))) {
+  if (request.path.startsWith('/graphql')) {
+    // handle session checking in graphql handler
     return await resolve(request)
   }
 

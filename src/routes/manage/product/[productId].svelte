@@ -1,11 +1,36 @@
 <script lang="ts" context="module">
   import type { Load } from '@sveltejs/kit'
-  import type { Product_Get_Endpoint } from '$lib/types/api'
   export const load: Load = async ({ page, fetch, session }) => {
-    const res: Product_Get_Endpoint = await fetch(
-      `/api/products?id=${page.params.productId}`
-    ).then((r) => r.json())
-    const product = (res.data || [])[0]
+    const res = await fetch('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        variables: { id: page.params.productId },
+        query: `query ($id: String!) {
+          get_product(id: $id) {
+            id
+            name
+            description
+            price
+            currency
+            enabled
+            imageUrl
+            sellerId
+            audioPreviewUrl
+            audioProductUrl
+          }
+        }`
+      })
+    }).then((r) => r.json())
+    if (res.errors) {
+      return {
+        status: 400,
+        error: new Error(res.errors[0].message)
+      }
+    }
+    const product = res.data.get_product
 
     if (!product) {
       return {
@@ -27,6 +52,7 @@
 </script>
 
 <script lang="ts">
+  import _ from 'lodash'
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { getChangedFields } from '$lib/utils/client'
@@ -48,6 +74,26 @@
   export let imageUrl = product.imageUrl || ''
   export let audioPreviewUrl = product.audioPreviewUrl || ''
   export let audioProductUrl = product.audioProductUrl || ''
+
+  const baseMutation = `mutation ($id: String!, $contentType: String!) {
+    fileUpload: {}(id: $id, contentType: $contentType) {
+      signedUrl
+      fileUrl
+      draftId
+    }
+  }`
+  const imageUploadMutation = baseMutation.replace(
+    '{}',
+    'upload_product_draft_display_image'
+  )
+  const audioPreviewUploadMutation = baseMutation.replace(
+    '{}',
+    'upload_product_draft_audio_preview'
+  )
+  const audioProductUploadMutation = baseMutation.replace(
+    '{}',
+    'upload_product_draft_audio_product'
+  )
 
   let imageDraftId = ''
   let audioPreviewDraftId = ''
@@ -72,17 +118,52 @@
     }
     try {
       isSaving = true
-      const res = await axios.put<Product_Put_Endpoint>(
-        '/api/products',
-        changedFields
-      )
-      formData = { ...formData, ...res.data.data }
+      const res = await axios.post('/graphql', {
+        variables: changedFields,
+        query: `mutation (
+          $id: String,
+          $name: String,
+          $description: String,
+          $price: Float,
+          $currency: String,
+          $enabled: Boolean,
+          $imageDraftId: String,
+          $audioPreviewDraftId: String,
+          $audioProductDraftId: String
+        ) {
+          update_product(
+            id: $id,
+            name: $name,
+            description: $description,
+            price: $price,
+            currency: $currency,
+            enabled: $enabled,
+            imageDraftId: $imageDraftId,
+            audioPreviewDraftId: $audioPreviewDraftId,
+            audioProductDraftId: $audioProductDraftId
+          ) {
+            name
+            description
+            price
+            currency
+            enabled
+          }
+        }
+        `
+      })
+      if (res.data.errors) {
+        throw new Error(res.data.errors[0].message)
+      }
+      formData = {
+        ...formData,
+        ..._.pickBy(res.data.data.upload_product, (v) => v !== null)
+      }
       // update all storage urls in memory
       product.imageUrl = imageUrl
       product.audioPreviewUrl = audioPreviewUrl
       product.audioProductUrl = audioProductUrl
     } catch (err) {
-      submissionError = err.response?.data?.message || err
+      submissionError = err.message
     } finally {
       isSaving = false
     }
@@ -143,6 +224,7 @@
         body={{ id: product.id }}
         bind:newFileUrl={audioProductUrl}
         bind:fileDraftId={audioProductDraftId}
+        mutation={audioProductUploadMutation}
       >
         upload product file
       </FileUpload>
@@ -162,6 +244,7 @@
         body={{ id: product.id }}
         bind:newFileUrl={audioPreviewUrl}
         bind:fileDraftId={audioPreviewDraftId}
+        mutation={audioPreviewUploadMutation}
       >
         upload preview audio
       </FileUpload>
@@ -181,6 +264,7 @@
           body={{ id: product.id }}
           bind:newFileUrl={imageUrl}
           bind:fileDraftId={imageDraftId}
+          mutation={imageUploadMutation}
         >
           upload image
         </FileUpload>

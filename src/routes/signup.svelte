@@ -42,15 +42,33 @@
 
   async function onSubmit() {
     submissionError = ''
-    try {
-      const res = await axios.post<Auth_Signup_Post_Endpoint>(
-        '/api/auth/signup',
-        formData
-      )
-      $session = { seller: res.data.data }
+    const res = await axios.post('/graphql', {
+      variables: formData,
+      query: `mutation (
+          $username: String!
+          $email: String!
+          $password: String!
+          $confirmPassword: String!
+        ) {
+          seller_signup(
+            username: $username,
+            email: $email,
+            password: $password,
+            confirmPassword: $confirmPassword
+          ) {
+            token
+            seller {
+              id
+              username
+            }
+          }
+        }`
+    })
+    if (res.data.errors) {
+      submissionError = res.data.errors[0].message
+    } else {
+      $session = { seller: res.data.data.seller_signup.seller }
       goto('/manage')
-    } catch (err) {
-      submissionError = err.response?.data?.message
     }
   }
 </script>

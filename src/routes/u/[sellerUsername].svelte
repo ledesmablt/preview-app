@@ -1,26 +1,48 @@
 <script lang="ts" context="module">
+  import _ from 'lodash'
   import type { Load } from '@sveltejs/kit'
-  import type {
-    Seller_Get_Endpoint,
-    Product_Get_Endpoint
-  } from '$lib/types/api'
   export const load: Load = async ({ page, fetch }) => {
     const username = page.params.sellerUsername
-    const sellerRes: Seller_Get_Endpoint = await fetch(
-      `/api/seller?username=${username}`
-    ).then((r) => r.json())
-    const seller = sellerRes.data
+    const res = await fetch('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        variables: { username },
+        query: `query ($username: String!) {
+          get_seller(username: $username) {
+            id
+            email
+            username
+            bio
+            userImageUrl
+            products {
+              id
+              name
+              price
+              currency
+              enabled
+              imageUrl
+            }
+          }
+        }`
+      })
+    }).then((r) => r.json())
+    if (res.errors) {
+      return {
+        status: 400,
+        error: new Error(res.errors[0].message)
+      }
+    }
+    const seller = res.data.get_seller
     if (!seller) {
       return {
         status: 404,
         error: new Error(`Seller ${username} not found`)
       }
     }
-
-    const productRes: Product_Get_Endpoint = await fetch(
-      `/api/products?sellerId=${seller?.id}&shop=true`
-    ).then((r) => r.json())
-    const products = productRes.data || []
+    const products = seller.products
     return {
       props: {
         seller,
@@ -51,6 +73,13 @@
   export let seller: Seller_Get_Data
   export let products: Product_Get_Data
 
+  const userImageMutation = `mutation ($contentType: String!) {
+    fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
+      signedUrl
+      fileUrl
+      draftId
+    }
+  }`
   let userImageUrl = seller.userImageUrl || ''
   let userImageDraftId = ''
   let isEditing = false
@@ -71,11 +100,38 @@
       changedValues.userImageDraftId = userImageDraftId
     }
     isSaving = true
-    const res = await axios.put<Seller_Put_Endpoint>(
-      '/api/seller',
-      changedValues
-    )
-    seller = { ...seller, ...res.data.data }
+    const res = await axios.post('/graphql', {
+      variables: changedValues,
+      query: `mutation (
+        $username: String,
+        $bio: String,
+        $email: String,
+        $password: String,
+        $userImageDraftId: String
+      ) {
+        update_seller(
+          username: $username,
+          bio: $bio,
+          email: $email,
+          password: $password,
+          userImageDraftId: $userImageDraftId
+        ) {
+          id
+          username
+          bio
+          email
+          password
+        }
+      }`
+    })
+    if (res.data.errors) {
+      console.error(res)
+      alert(res.data.errors[0].message)
+    }
+    seller = {
+      ...seller,
+      ..._.pickBy(res.data.data.update_seller, (v) => v !== null)
+    }
     seller.userImageUrl = userImageUrl
     userImageDraftId = ''
     isEditing = false
@@ -103,6 +159,7 @@
         endpoint="/api/seller/storage/userImage"
         bind:newFileUrl={userImageUrl}
         bind:fileDraftId={userImageDraftId}
+        mutation={userImageMutation}
       >
         change
       </FileUpload>
@@ -162,7 +219,7 @@
         <div class="rounded-lg aspect-w-1 aspect-h-1 mb-1">
           <img
             class="w-full object-cover hover:opacity-75 "
-            src={product.imageUrl ?? 'NO IMAGE'}
+            src={product.imageUrl || undefined}
             alt={product.name}
           />
         </div>
