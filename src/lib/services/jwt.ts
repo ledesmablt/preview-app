@@ -57,7 +57,11 @@ export async function isLoggedIn(
 }
 
 export function setTokenAsCookie(token: string, headers: Headers) {
-  headers['set-cookie'] = cookie.serialize('token', token, DEFAULT_COOKIE)
+  let c = DEFAULT_COOKIE
+  if (token === 'deleted') {
+    c.expires = new Date()
+  }
+  headers['set-cookie'] = cookie.serialize('token', token, c)
 }
 
 export function signToken(
