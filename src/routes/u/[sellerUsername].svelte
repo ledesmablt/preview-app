@@ -2,14 +2,15 @@
   import type { Load } from '@sveltejs/kit'
   export const load: Load = async ({ page, fetch }) => {
     const username = page.params.sellerUsername
-    const sellerRes = await fetch('/graphql', {
+    const res = await fetch('/graphql', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        query: `{
-          get_seller(username: "${username}") {
+        variables: { username },
+        query: `query ($username: String!) {
+          get_seller(username: $username) {
             id
             email
             username
@@ -26,17 +27,14 @@
           }
         }`
       })
-    }).then((r) => {
-      return r.json()
-    })
-    if (sellerRes.errors) {
-      console.error(sellerRes.errors)
+    }).then((r) => r.json())
+    if (res.errors) {
       return {
         status: 400,
-        error: new Error(JSON.stringify(sellerRes.errors))
+        error: new Error(res.errors[0].message)
       }
     }
-    const seller = sellerRes.data.get_seller
+    const seller = res.data.get_seller
     if (!seller) {
       return {
         status: 404,

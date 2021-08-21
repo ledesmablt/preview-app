@@ -7,8 +7,9 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        query: `{
-          get_product(id: "${page.params.productId}") {
+        variables: { id: page.params.productId },
+        query: `query ($id: String!) {
+          get_product(id: $id) {
             id
             name
             description
@@ -22,9 +23,13 @@
           }
         }`
       })
-    }).then((r) => {
-      return r.json()
-    })
+    }).then((r) => r.json())
+    if (res.errors) {
+      return {
+        status: 400,
+        error: new Error(res.errors[0].message)
+      }
+    }
     const product = res.data.get_product
 
     if (!product) {

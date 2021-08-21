@@ -58,6 +58,7 @@
           ) {
             token
             seller {
+              id
               username
             }
           }

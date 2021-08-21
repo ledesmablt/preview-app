@@ -7,8 +7,9 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        query: `{
-          get_seller(username: "${session.seller?.username}") {
+        variables: { username: session.seller?.username },
+        query: `query ($username: String!) {
+          get_seller(username: $username) {
             products {
               id
               name
@@ -21,6 +22,12 @@
         }`
       })
     }).then((r) => r.json())
+    if (res.errors) {
+      return {
+        status: 400,
+        error: new Error(res.errors[0].message)
+      }
+    }
     const products = res.data.get_seller?.products || []
     return {
       props: {

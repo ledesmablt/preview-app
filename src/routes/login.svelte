@@ -28,6 +28,7 @@
           seller_login(emailOrUsername: $emailOrUsername, password: $password) {
             token
             seller {
+              id
               username
             }
           }
