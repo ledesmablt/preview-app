@@ -1,13 +1,8 @@
-import type { RequestHandler } from 'express-serve-static-core'
+import type { Locals, RequestHandler } from '@sveltejs/kit'
 import { respond } from '$lib/graphql/server'
 
-export const del: RequestHandler = ({ body, headers, query }) =>
-  respond({ body, headers, method: 'DELETE', query })
-export const get: RequestHandler = ({ body, headers, query }) =>
-  respond({ body, headers, method: 'GET', query })
-export const head: RequestHandler = ({ body, headers, query }) =>
-  respond({ body, headers, method: 'HEAD', query })
-export const post: RequestHandler = ({ body, headers, query }) =>
-  respond({ body, headers, method: 'POST', query })
-export const put: RequestHandler = ({ body, headers, query }) =>
-  respond({ body, headers, method: 'PUT', query })
+export const del: RequestHandler<Locals> = (req) => respond(req)
+export const get: RequestHandler<Locals> = (req) => respond(req)
+export const head: RequestHandler<Locals> = (req) => respond(req)
+export const post: RequestHandler<Locals> = (req) => respond(req)
+export const put: RequestHandler<Locals> = (req) => respond(req)

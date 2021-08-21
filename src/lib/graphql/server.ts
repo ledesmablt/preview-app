@@ -1,14 +1,16 @@
-import type { Response } from '@sveltejs/kit'
+import type { Request, Locals, Response } from '@sveltejs/kit'
+import type { Session } from '$lib/stores/session'
 import { getGraphQLParameters } from 'graphql-helix/dist/get-graphql-parameters.js'
 import { processRequest } from 'graphql-helix/dist/process-request.js'
 import { renderGraphiQL } from 'graphql-helix/dist/render-graphiql.js'
 import { shouldRenderGraphiQL } from 'graphql-helix/dist/should-render-graphiql.js'
 
 import { createSchema } from './schema'
+import { isLoggedIn } from '$lib/services/jwt'
 
 const schemaPromise = createSchema()
 
-export const respond = async (request: any): Promise<Response> => {
+export const respond = async (request: Request<Locals>): Promise<Response> => {
   if (
     !request.body &&
     request.method === 'GET' &&
@@ -27,10 +29,12 @@ export const respond = async (request: any): Promise<Response> => {
   const result = await processRequest({
     ...parameters,
     // For example, auth information is put in context for the resolver
-    contextFactory: () => ({
-      authorization:
-        request.headers['Authorization'] ?? request.headers['authorization']
-    }),
+    contextFactory: async (): Promise<Session> => {
+      const seller = await isLoggedIn(request)
+      return {
+        seller
+      }
+    },
     request,
     schema: await schemaPromise
   })
