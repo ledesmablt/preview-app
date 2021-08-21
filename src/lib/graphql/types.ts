@@ -39,10 +39,9 @@ export const seller: GraphQLObjectType = new GraphQLObjectType<Seller, Context>(
       userImageUrl: {
         type: GraphQLString,
         async resolve(seller) {
-          const [[file]] = await publicBucket.getFiles({
-            prefix: `sellers/${seller.username}/userImage`
-          })
-          return file ? file.publicUrl() : null
+          const prefix = `sellers/${seller.username}/userImage`
+          const file = publicBucket.file(prefix)
+          return (await file.exists()) ? file.publicUrl() : null
         }
       },
       products: {
@@ -99,28 +98,25 @@ export const product: GraphQLObjectType = new GraphQLObjectType<
     imageUrl: {
       type: GraphQLString,
       async resolve(product) {
-        const [[file]] = await publicBucket.getFiles({
-          prefix: `products/${product.id}/displayImage`
-        })
-        return file ? file.publicUrl() : null
+        const prefix = `products/${product.id}/displayImage`
+        const file = publicBucket.file(prefix)
+        return (await file.exists()) ? file.publicUrl() : null
       }
     },
     audioPreviewUrl: {
       type: GraphQLString,
       async resolve(product) {
-        const [[file]] = await publicBucket.getFiles({
-          prefix: `products/${product.id}/audioPreview`
-        })
-        return file ? file.publicUrl() : null
+        const prefix = `products/${product.id}/audioPreview`
+        const file = publicBucket.file(prefix)
+        return (await file.exists()) ? file.publicUrl() : null
       }
     },
     audioProductUrl: {
       type: GraphQLString,
       async resolve(product) {
-        const [[file]] = await privateBucket.getFiles({
-          prefix: `products/${product.id}/audioProduct`
-        })
-        return file ? file.publicUrl() : null
+        const prefix = `products/${product.id}/audioProduct`
+        const file = privateBucket.file(prefix)
+        return (await file.exists()) ? file.publicUrl() : null
       }
     }
   })
