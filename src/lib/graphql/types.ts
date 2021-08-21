@@ -9,10 +9,11 @@ import {
   GraphQLFloat
 } from 'graphql'
 import prisma from '$lib/services/prisma'
+import { publicBucket, privateBucket } from '$lib/services/storage'
 
 export type Context = Session
 
-export const seller: GraphQLObjectType<Seller, Context> = new GraphQLObjectType(
+export const seller: GraphQLObjectType = new GraphQLObjectType<Seller, Context>(
   {
     name: 'Seller',
     fields: () => ({
@@ -37,6 +38,15 @@ export const seller: GraphQLObjectType<Seller, Context> = new GraphQLObjectType(
       bio: {
         type: GraphQLString
       },
+      userImageUrl: {
+        type: GraphQLString,
+        async resolve(seller) {
+          const [[file]] = await publicBucket.getFiles({
+            prefix: `sellers/${seller.username}/userImage`
+          })
+          return file ? file.publicUrl() : null
+        }
+      },
       products: {
         type: GraphQLList(product),
         async resolve(seller) {
@@ -49,33 +59,44 @@ export const seller: GraphQLObjectType<Seller, Context> = new GraphQLObjectType(
   }
 )
 
-export const product: GraphQLObjectType<Product, Context> =
-  new GraphQLObjectType({
-    name: 'Product',
-    fields: () => ({
-      id: {
-        type: GraphQLID
-      },
-      name: {
-        type: GraphQLString
-      },
-      description: {
-        type: GraphQLString
-      },
-      price: {
-        type: GraphQLFloat
-      },
-      currency: {
-        type: GraphQLString
-      },
-      enabled: {
-        type: GraphQLBoolean
-      },
-      sellerId: {
-        type: GraphQLID
-      },
-      seller: {
-        type: seller
+export const product: GraphQLObjectType = new GraphQLObjectType<
+  Product,
+  Context
+>({
+  name: 'Product',
+  fields: () => ({
+    id: {
+      type: GraphQLID
+    },
+    name: {
+      type: GraphQLString
+    },
+    description: {
+      type: GraphQLString
+    },
+    price: {
+      type: GraphQLFloat
+    },
+    currency: {
+      type: GraphQLString
+    },
+    enabled: {
+      type: GraphQLBoolean
+    },
+    sellerId: {
+      type: GraphQLID
+    },
+    seller: {
+      type: seller
+    },
+    imageUrl: {
+      type: GraphQLString,
+      async resolve(product) {
+        const [[file]] = await publicBucket.getFiles({
+          prefix: `products/${product.id}/displayImage`
+        })
+        return file ? file.publicUrl() : null
       }
-    })
+    }
   })
+})

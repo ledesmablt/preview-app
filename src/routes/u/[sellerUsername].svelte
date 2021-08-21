@@ -1,26 +1,49 @@
 <script lang="ts" context="module">
   import type { Load } from '@sveltejs/kit'
-  import type {
-    Seller_Get_Endpoint,
-    Product_Get_Endpoint
-  } from '$lib/types/api'
   export const load: Load = async ({ page, fetch }) => {
     const username = page.params.sellerUsername
-    const sellerRes: Seller_Get_Endpoint = await fetch(
-      `/api/seller?username=${username}`
-    ).then((r) => r.json())
-    const seller = sellerRes.data
+    const sellerRes = await fetch('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: `{
+          get_seller(username: "${username}") {
+            id
+            email
+            username
+            bio
+            userImageUrl
+            products {
+              id
+              name
+              price
+              currency
+              enabled
+              imageUrl
+            }
+          }
+        }`
+      })
+    }).then((r) => {
+      return r.json()
+    })
+    if (sellerRes.errors) {
+      console.error(sellerRes.errors)
+      return {
+        status: 400,
+        error: new Error(JSON.stringify(sellerRes.errors))
+      }
+    }
+    const seller = sellerRes.data.get_seller
     if (!seller) {
       return {
         status: 404,
         error: new Error(`Seller ${username} not found`)
       }
     }
-
-    const productRes: Product_Get_Endpoint = await fetch(
-      `/api/products?sellerId=${seller?.id}&shop=true`
-    ).then((r) => r.json())
-    const products = productRes.data || []
+    const products = seller.products
     return {
       props: {
         seller,
@@ -162,7 +185,7 @@
         <div class="rounded-lg aspect-w-1 aspect-h-1 mb-1">
           <img
             class="w-full object-cover hover:opacity-75 "
-            src={product.imageUrl ?? 'NO IMAGE'}
+            src={product.imageUrl || undefined}
             alt={product.name}
           />
         </div>
