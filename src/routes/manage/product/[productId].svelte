@@ -74,6 +74,26 @@
   export let audioPreviewUrl = product.audioPreviewUrl || ''
   export let audioProductUrl = product.audioProductUrl || ''
 
+  const baseMutation = `mutation ($id: String!, $contentType: String!) {
+    fileUpload: {}(id: $id, contentType: $contentType) {
+      signedUrl
+      fileUrl
+      draftId
+    }
+  }`
+  const imageUploadMutation = baseMutation.replace(
+    '{}',
+    'upload_product_draft_display_image'
+  )
+  const audioPreviewUploadMutation = baseMutation.replace(
+    '{}',
+    'upload_product_draft_audio_preview'
+  )
+  const audioProductUploadMutation = baseMutation.replace(
+    '{}',
+    'upload_product_draft_audio_product'
+  )
+
   let imageDraftId = ''
   let audioPreviewDraftId = ''
   let audioProductDraftId = ''
@@ -168,6 +188,7 @@
         body={{ id: product.id }}
         bind:newFileUrl={audioProductUrl}
         bind:fileDraftId={audioProductDraftId}
+        mutation={audioProductUploadMutation}
       >
         upload product file
       </FileUpload>
@@ -187,6 +208,7 @@
         body={{ id: product.id }}
         bind:newFileUrl={audioPreviewUrl}
         bind:fileDraftId={audioPreviewDraftId}
+        mutation={audioPreviewUploadMutation}
       >
         upload preview audio
       </FileUpload>
@@ -206,6 +228,7 @@
           body={{ id: product.id }}
           bind:newFileUrl={imageUrl}
           bind:fileDraftId={imageDraftId}
+          mutation={imageUploadMutation}
         >
           upload image
         </FileUpload>
