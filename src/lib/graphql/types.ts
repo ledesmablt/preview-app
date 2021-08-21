@@ -97,6 +97,24 @@ export const product: GraphQLObjectType = new GraphQLObjectType<
         })
         return file ? file.publicUrl() : null
       }
+    },
+    audioPreviewUrl: {
+      type: GraphQLString,
+      async resolve(product) {
+        const [[file]] = await publicBucket.getFiles({
+          prefix: `products/${product.id}/audioPreview`
+        })
+        return file ? file.publicUrl() : null
+      }
+    },
+    audioProductUrl: {
+      type: GraphQLString,
+      async resolve(product) {
+        const [[file]] = await privateBucket.getFiles({
+          prefix: `products/${product.id}/audioProduct`
+        })
+        return file ? file.publicUrl() : null
+      }
     }
   })
 })
