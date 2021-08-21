@@ -64,7 +64,7 @@
         }`
     })
     if (res.data.errors) {
-      submissionError = res.data.errors[0]?.message
+      submissionError = res.data.errors[0].message
     } else {
       $session = { seller: res.data.data.seller_signup.seller }
       goto('/manage')

@@ -19,22 +19,25 @@
   let submissionError: string = ''
 
   async function onSubmit() {
-    try {
-      const res = await axios.post('/graphql', {
-        query: `mutation {
-          seller_login(emailOrUsername: "${formData.emailOrUsername}", password: "${formData.password}") {
+    const res = await axios.post('/graphql', {
+      variables: formData,
+      query: `mutation (
+        $emailOrUsername: String!,
+        $password: String!
+      ) {
+          seller_login(emailOrUsername: $emailOrUsername, password: $password) {
             token
             seller {
               username
             }
           }
         }`
-      })
+    })
+    if (res.data.errors) {
+      submissionError = res.data.errors[0].message
+    } else {
       $session = { seller: res.data.data.seller_login.seller }
       goto('/manage')
-    } catch (err) {
-      console.error(err)
-      submissionError = err.response?.data?.errors[0]?.message
     }
   }
 </script>
