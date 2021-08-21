@@ -9,15 +9,15 @@
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        variables: { username },
-        query: `query ($username: String!) {
+        variables: { username, fromShop: true },
+        query: `query ($username: String!, $fromShop: Boolean!) {
           get_seller(username: $username) {
             id
             email
             username
             bio
             userImageUrl
-            products {
+            products(fromShop: $fromShop) {
               id
               name
               price

@@ -47,9 +47,18 @@ export const seller: GraphQLObjectType = new GraphQLObjectType<Seller, Context>(
       },
       products: {
         type: GraphQLList(product),
-        async resolve(seller) {
+        args: {
+          fromShop: { type: GraphQLBoolean }
+        },
+        async resolve(seller, args, ctx) {
+          let enabled: boolean | undefined = true
+          const authorized = ctx.seller?.id === seller.id
+          if (authorized && !args.fromShop) {
+            // show disabled products only if authorized
+            enabled = undefined
+          }
           return await prisma.product.findMany({
-            where: { sellerId: seller.id }
+            where: { sellerId: seller.id, enabled }
           })
         }
       }
