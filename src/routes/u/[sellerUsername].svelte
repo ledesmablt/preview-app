@@ -59,19 +59,12 @@
   import { getChangedFields } from '$lib/utils/client'
   import FileUpload from '$lib/components/FileUpload.svelte'
 
-  import type {
-    Seller_Get_Data,
-    Seller_Put_Body,
-    Seller_Put_Endpoint,
-    Product_Get_Data
-  } from '$lib/types/api'
-
   $: authorizedForPage =
     $session.seller?.username === $page.params.sellerUsername &&
     $page.params.sellerUsername
 
-  export let seller: Seller_Get_Data
-  export let products: Product_Get_Data
+  export let seller: any
+  export let products: any
 
   const userImageMutation = `mutation ($contentType: String!) {
     fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
@@ -84,7 +77,7 @@
   let userImageDraftId = ''
   let isEditing = false
   let isSaving = false
-  let editFormData: Seller_Put_Body = {
+  let editFormData = {
     email: seller.email,
     bio: seller.bio,
     username: seller.username

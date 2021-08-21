@@ -56,14 +56,9 @@
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { getChangedFields } from '$lib/utils/client'
-  import type {
-    Product_Get_Data_Element,
-    Product_Put_Body,
-    Product_Put_Endpoint
-  } from '$lib/types/api'
 
-  export let product: Product_Get_Data_Element
-  let formData: Product_Put_Body = {
+  export let product: any
+  let formData = {
     id: product.id,
     name: product.name,
     description: product.description || '',
@@ -103,7 +98,7 @@
   let isSaving = false
 
   async function onSubmit() {
-    const changedFields: Product_Put_Body = {
+    const changedFields: any = {
       ...getChangedFields(formData, product),
       id: product.id
     }

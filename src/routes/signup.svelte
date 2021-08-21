@@ -4,10 +4,6 @@
   import { onMount } from 'svelte'
   import { validate } from '$lib/utils/validation/signup'
   import type { Validation } from '$lib/utils/validation/signup'
-  import type {
-    Auth_Signup_Post_Body,
-    Auth_Signup_Post_Endpoint
-  } from '$lib/types/api'
   import axios from 'axios'
 
   $: authorized = $session.seller
@@ -17,7 +13,7 @@
     }
   })
 
-  let formData: Auth_Signup_Post_Body = {
+  let formData = {
     username: '',
     email: '',
     password: '',
