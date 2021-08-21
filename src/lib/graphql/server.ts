@@ -1,4 +1,4 @@
-import type { RequestHandler, Response } from '@sveltejs/kit'
+import type { Response } from '@sveltejs/kit'
 import { getGraphQLParameters } from 'graphql-helix/dist/get-graphql-parameters.js'
 import { processRequest } from 'graphql-helix/dist/process-request.js'
 import { renderGraphiQL } from 'graphql-helix/dist/render-graphiql.js'
@@ -8,7 +8,7 @@ import { createSchema } from './schema'
 
 const schemaPromise = createSchema()
 
-const respond = async (request: any): Promise<Response> => {
+export const respond = async (request: any): Promise<Response> => {
   if (
     !request.body &&
     request.method === 'GET' &&
