@@ -1,4 +1,5 @@
 <script lang="ts" context="module">
+  import _ from 'lodash'
   import type { Load } from '@sveltejs/kit'
   export const load: Load = async ({ page, fetch }) => {
     const username = page.params.sellerUsername
@@ -92,11 +93,38 @@
       changedValues.userImageDraftId = userImageDraftId
     }
     isSaving = true
-    const res = await axios.put<Seller_Put_Endpoint>(
-      '/api/seller',
-      changedValues
-    )
-    seller = { ...seller, ...res.data.data }
+    const res = await axios.post('/graphql', {
+      variables: changedValues,
+      query: `mutation (
+        $username: String,
+        $bio: String,
+        $email: String,
+        $password: String,
+        $userImageDraftId: String
+      ) {
+        update_seller(
+          username: $username,
+          bio: $bio,
+          email: $email,
+          password: $password,
+          userImageDraftId: $userImageDraftId
+        ) {
+          id
+          username
+          bio
+          email
+          password
+        }
+      }`
+    })
+    if (res.data.errors) {
+      console.error(res)
+      alert(res.data.errors[0].message)
+    }
+    seller = {
+      ...seller,
+      ..._.pickBy(res.data.data.update_seller, (v) => v !== null)
+    }
     seller.userImageUrl = userImageUrl
     userImageDraftId = ''
     isEditing = false
