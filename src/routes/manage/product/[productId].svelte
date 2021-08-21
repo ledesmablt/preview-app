@@ -52,6 +52,7 @@
 </script>
 
 <script lang="ts">
+  import _ from 'lodash'
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { getChangedFields } from '$lib/utils/client'
@@ -117,17 +118,52 @@
     }
     try {
       isSaving = true
-      const res = await axios.put<Product_Put_Endpoint>(
-        '/api/products',
-        changedFields
-      )
-      formData = { ...formData, ...res.data.data }
+      const res = await axios.post('/graphql', {
+        variables: changedFields,
+        query: `mutation (
+          $id: String,
+          $name: String,
+          $description: String,
+          $price: Float,
+          $currency: String,
+          $enabled: Boolean,
+          $imageDraftId: String,
+          $audioPreviewDraftId: String,
+          $audioProductDraftId: String
+        ) {
+          update_product(
+            id: $id,
+            name: $name,
+            description: $description,
+            price: $price,
+            currency: $currency,
+            enabled: $enabled,
+            imageDraftId: $imageDraftId,
+            audioPreviewDraftId: $audioPreviewDraftId,
+            audioProductDraftId: $audioProductDraftId
+          ) {
+            name
+            description
+            price
+            currency
+            enabled
+          }
+        }
+        `
+      })
+      if (res.data.errors) {
+        throw new Error(res.data.errors[0].message)
+      }
+      formData = {
+        ...formData,
+        ..._.pickBy(res.data.data.upload_product, (v) => v !== null)
+      }
       // update all storage urls in memory
       product.imageUrl = imageUrl
       product.audioPreviewUrl = audioPreviewUrl
       product.audioProductUrl = audioProductUrl
     } catch (err) {
-      submissionError = err.response?.data?.message || err
+      submissionError = err.message
     } finally {
       isSaving = false
     }
