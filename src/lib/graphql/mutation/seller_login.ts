@@ -5,15 +5,16 @@ import { GraphQLString, GraphQLFieldConfig } from 'graphql'
 import { loginResult } from '../types'
 import prisma from '$lib/services/prisma'
 import type { Seller } from '@prisma/client'
+import type { GraphQLContext } from '../server'
 
-const seller_login: GraphQLFieldConfig<any, any, any> = {
+const seller_login: GraphQLFieldConfig<any, GraphQLContext> = {
   args: {
     emailOrUsername: { type: GraphQLString },
     password: { type: GraphQLString }
   },
   type: loginResult,
   async resolve(_source, args, ctx) {
-    const { emailOrUsername, password = '' } = args
+    const { emailOrUsername, password } = args
     let seller: Seller
     seller = await prisma.seller.findFirst({
       where: {

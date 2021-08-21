@@ -1,6 +1,7 @@
 import { GraphQLFieldConfig, GraphQLBoolean } from 'graphql'
+import type { GraphQLContext } from '../server'
 
-const logout: GraphQLFieldConfig<any, any, any> = {
+const logout: GraphQLFieldConfig<any, GraphQLContext> = {
   type: GraphQLBoolean,
   async resolve(_source, _args, ctx) {
     if (!ctx.seller) {

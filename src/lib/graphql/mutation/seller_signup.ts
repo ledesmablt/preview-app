@@ -7,8 +7,9 @@ import { loginResult } from '../types'
 import { SALT_ROUNDS } from '$lib/constants'
 import prisma from '$lib/services/prisma'
 import type { Seller } from '@prisma/client'
+import type { GraphQLContext } from '../server'
 
-const seller_signup: GraphQLFieldConfig<any, any, any> = {
+const seller_signup: GraphQLFieldConfig<any, GraphQLContext> = {
   args: {
     username: { type: GraphQLString },
     email: { type: GraphQLString },

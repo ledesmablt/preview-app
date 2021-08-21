@@ -1,8 +1,9 @@
 import { GraphQLString, GraphQLFieldConfig } from 'graphql'
 import { seller } from '../types'
 import prisma from '$lib/services/prisma'
+import type { GraphQLContext } from '../server'
 
-const get_seller: GraphQLFieldConfig<any, any, any> = {
+const get_seller: GraphQLFieldConfig<any, GraphQLContext> = {
   args: {
     id: { type: GraphQLString },
     username: { type: GraphQLString }
