@@ -12,49 +12,6 @@ import type {
 import type { Seller } from '@prisma/client'
 import { SALT_ROUNDS } from '$lib/constants'
 
-export async function get(
-  req: Request
-): Promise<EndpointOutput<Seller_Get_Endpoint>> {
-  const username = req.query.get('username')
-  if (!username) {
-    return {
-      status: 400,
-      body: {
-        message: 'Missing parameter [username]'
-      }
-    }
-  }
-  let seller: Seller
-  try {
-    seller = await prisma.seller.findFirst({
-      where: {
-        username
-      },
-      rejectOnNotFound: true
-    })
-  } catch (err) {
-    return {
-      status: 404
-    }
-  }
-
-  const { email, bio, id } = seller
-  const [[file]] = await publicBucket.getFiles({
-    prefix: `sellers/${username}/userImage`
-  })
-  return {
-    body: {
-      data: {
-        id,
-        email,
-        bio,
-        username,
-        userImageUrl: file ? file.publicUrl() : null
-      }
-    }
-  }
-}
-
 export async function put(
   req: Request<Locals, Seller_Put_Body>
 ): Promise<EndpointOutput<Seller_Put_Endpoint>> {
