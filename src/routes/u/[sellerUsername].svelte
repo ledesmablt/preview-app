@@ -210,7 +210,7 @@
 <div>
   <div class="grid grid-cols-3 gap-y-10 gap-x-6">
     {#each products as product}
-      <a href={'#'}>
+      <a href={`/product/${product.id}`}>
         <div class="rounded-lg aspect-w-1 aspect-h-1 mb-1">
           <img
             class="w-full object-cover hover:opacity-75 "
