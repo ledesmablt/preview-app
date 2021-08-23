@@ -1,7 +1,9 @@
 <script lang="ts" context="module">
-  import type { SellerPage$input } from '$houdini'
+  import type { SellerPageQuery$input } from '$houdini'
   import type { LoadInput } from '@sveltejs/kit'
-  export function SellerPageVariables({ page }: LoadInput): SellerPage$input {
+  export function SellerPageQueryVariables({
+    page
+  }: LoadInput): SellerPageQuery$input {
     return {
       username: page.params.sellerUsername,
       fromShop: true
@@ -11,18 +13,14 @@
 
 <script lang="ts">
   import { query, graphql } from '$houdini'
-  import type { SellerPage } from '$houdini'
+  import type { SellerPageQuery } from '$houdini'
   import axios from 'axios'
   import { page } from '$app/stores'
   import { session } from '$lib/stores'
   import FileUpload from '$lib/components/FileUpload.svelte'
 
-  $: authorizedForPage =
-    $session.seller?.username === $page.params.sellerUsername &&
-    $page.params.sellerUsername
-
-  const { data: queryData } = query<SellerPage>(graphql`
-    query SellerPage($username: String!, $fromShop: Boolean!) {
+  const { data: queryData } = query<SellerPageQuery>(graphql`
+    query SellerPageQuery($username: String!, $fromShop: Boolean!) {
       get_seller(username: $username) {
         id
         email
@@ -40,6 +38,11 @@
       }
     }
   `)
+  let seller = { ...$queryData.get_seller }
+  if (!seller.id) {
+    throw new Error(`Seller ${$page.params.sellerUsername} not found`)
+  }
+
   const userImageMutation = `mutation ($contentType: String!) {
     fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
       signedUrl
@@ -47,12 +50,8 @@
       draftId
     }
   }`
-  let seller = $queryData.get_seller as any
-  if (!seller) {
-    throw new Error(`Seller ${$page.params.sellerUsername} not found`)
-  }
 
-  let products = seller.products as any[]
+  let products = seller!.products || []
   let userImageUrl = seller.userImageUrl || ''
   let userImageDraftId = ''
   let isEditing = false
@@ -61,6 +60,10 @@
     email: seller.email,
     bio: seller.bio
   }
+
+  $: authorizedForPage =
+    $session.seller?.username === $page.params.sellerUsername &&
+    $page.params.sellerUsername
 
   function resetImage() {
     userImageUrl = seller!.userImageUrl || ''
@@ -186,7 +189,7 @@
           <img
             class="w-full object-cover hover:opacity-75 "
             src={product.imageUrl || undefined}
-            alt={product.name}
+            alt={product.name || 'product image'}
           />
         </div>
         <h3>{product.name}</h3>
