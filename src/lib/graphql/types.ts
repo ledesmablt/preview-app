@@ -76,19 +76,19 @@ export const product: GraphQLObjectType = new GraphQLObjectType<
       type: GraphQLNonNull(GraphQLID)
     },
     name: {
-      type: GraphQLString
+      type: GraphQLNonNull(GraphQLString)
     },
     description: {
-      type: GraphQLString
+      type: GraphQLNonNull(GraphQLString)
     },
     price: {
-      type: GraphQLFloat
+      type: GraphQLNonNull(GraphQLFloat)
     },
     currency: {
-      type: GraphQLString
+      type: GraphQLNonNull(GraphQLString)
     },
     enabled: {
-      type: GraphQLBoolean
+      type: GraphQLNonNull(GraphQLBoolean)
     },
     sellerId: {
       type: GraphQLNonNull(GraphQLID)

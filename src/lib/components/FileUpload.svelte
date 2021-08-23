@@ -9,7 +9,7 @@
   export let isUploading: boolean = false
   export let body: Record<string, any> = {}
   export let fileType: FileType = 'image'
-  export let fileDraftId: string = ''
+  export let fileDraftId: string | null | undefined = ''
   export let mutationFunction: ReturnType<typeof mutation>
 
   const fileExtensions: Record<FileType, string> = {

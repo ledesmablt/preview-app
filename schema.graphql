@@ -26,13 +26,13 @@ type Mutation {
 type Product {
   audioPreviewUrl: String
   audioProductUrl: String
-  currency: String
-  description: String
-  enabled: Boolean
+  currency: String!
+  description: String!
+  enabled: Boolean!
   id: ID!
   imageUrl: String
-  name: String
-  price: Float
+  name: String!
+  price: Float!
   seller: Seller!
   sellerId: ID!
 }

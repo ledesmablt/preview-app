@@ -11,16 +11,14 @@
 </script>
 
 <script lang="ts">
-  import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { goto } from '$app/navigation'
   import { query, mutation, graphql } from '$houdini'
   import { session } from '$app/stores'
   import type {
     ManageProductQuery,
-    ProductImageUploadMutation,
-    ProductAudioPreviewUploadMutation,
-    ProductAudioProductUploadMutation
+    UpdateProductMutation,
+    DeleteProductMutation
   } from '$houdini'
 
   const { data: queryData } = query<ManageProductQuery>(graphql`
@@ -52,7 +50,10 @@
     description: product.description || '',
     price: product.price,
     currency: product.currency,
-    enabled: !!product.enabled
+    enabled: !!product.enabled,
+    imageDraftId: '',
+    audioPreviewDraftId: '',
+    audioProductDraftId: ''
   }
   export let imageUrl = product.imageUrl || ''
   export let audioPreviewUrl = product.audioPreviewUrl || ''
@@ -100,88 +101,67 @@
       }
     }
   `)
-
-  let imageDraftId = ''
-  let audioPreviewDraftId = ''
-  let audioProductDraftId = ''
+  const updateMutation = mutation<UpdateProductMutation>(graphql`
+    mutation UpdateProductMutation(
+      $id: String
+      $name: String
+      $description: String
+      $price: Float
+      $currency: String
+      $enabled: Boolean
+      $imageDraftId: String
+      $audioPreviewDraftId: String
+      $audioProductDraftId: String
+    ) {
+      update_product(
+        id: $id
+        name: $name
+        description: $description
+        price: $price
+        currency: $currency
+        enabled: $enabled
+        imageDraftId: $imageDraftId
+        audioPreviewDraftId: $audioPreviewDraftId
+        audioProductDraftId: $audioProductDraftId
+      ) {
+        name
+        description
+        price
+        currency
+        enabled
+      }
+    }
+  `)
+  const deleteMutation = mutation<DeleteProductMutation>(graphql`
+    mutation DeleteProductMutation($id: String!) {
+      delete_product(id: $id)
+    }
+  `)
 
   let submissionError = ''
   let isSaving = false
 
   async function onSubmit() {
-    const variables: Record<string, any> = {
-      ...formData,
-      id: product.id
-    }
-    if (imageDraftId) {
-      variables.imageDraftId = imageDraftId
-    }
-    if (audioPreviewDraftId) {
-      variables.audioPreviewDraftId = audioPreviewDraftId
-    }
-    if (audioProductDraftId) {
-      variables.audioProductDraftId = audioProductDraftId
-    }
     try {
       isSaving = true
-      const res = await axios.post('/graphql', {
-        variables,
-        query: `mutation (
-          $id: String,
-          $name: String,
-          $description: String,
-          $price: Float,
-          $currency: String,
-          $enabled: Boolean,
-          $imageDraftId: String,
-          $audioPreviewDraftId: String,
-          $audioProductDraftId: String
-        ) {
-          update_product(
-            id: $id,
-            name: $name,
-            description: $description,
-            price: $price,
-            currency: $currency,
-            enabled: $enabled,
-            imageDraftId: $imageDraftId,
-            audioPreviewDraftId: $audioPreviewDraftId,
-            audioProductDraftId: $audioProductDraftId
-          ) {
-            name
-            description
-            price
-            currency
-            enabled
-          }
-        }
-        `
-      })
-      if (res.data.errors) {
-        throw new Error(res.data.errors[0].message)
-      }
-      formData = res.data.data.update_product
+      const res = await updateMutation(formData)
+      formData = { ...formData, ...res.update_product! }
       // update all storage urls in memory
       product.imageUrl = imageUrl
       product.audioPreviewUrl = audioPreviewUrl
       product.audioProductUrl = audioProductUrl
     } catch (err) {
-      submissionError = err.message
+      submissionError = err[0].message
     } finally {
       isSaving = false
     }
   }
   async function onDelete() {
-    const res = await axios.post('/graphql', {
-      variables: { id: product.id },
-      query: `mutation ($id: String!) {
-        delete_product(id: $id)
-      }`
-    })
-    if (res.data.errors) {
-      submissionError = res.data.errors[0].message
-    } else if (res.data.data.delete_product) {
+    try {
+      await deleteMutation({ id: product.id! })
       goto('/manage')
+    } catch (err) {
+      submissionError = err[0].message
     }
   }
 </script>
@@ -225,7 +205,7 @@
         fileType="audioOrZip"
         body={{ id: product.id }}
         bind:newFileUrl={audioProductUrl}
-        bind:fileDraftId={audioProductDraftId}
+        bind:fileDraftId={formData.audioProductDraftId}
         mutationFunction={audioProductUploadMutation}
       >
         upload product file
@@ -244,7 +224,7 @@
         fileType="audio"
         body={{ id: product.id }}
         bind:newFileUrl={audioPreviewUrl}
-        bind:fileDraftId={audioPreviewDraftId}
+        bind:fileDraftId={formData.audioPreviewDraftId}
         mutationFunction={audioPreviewUploadMutation}
       >
         upload preview audio
@@ -263,7 +243,7 @@
         <FileUpload
           body={{ id: product.id }}
           bind:newFileUrl={imageUrl}
-          bind:fileDraftId={imageDraftId}
+          bind:fileDraftId={formData.imageDraftId}
           mutationFunction={imageUploadMutation}
         >
           upload image
