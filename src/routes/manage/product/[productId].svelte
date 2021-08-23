@@ -215,7 +215,6 @@
   <div class="mb-2 flex space-x-2">
     <div class="editBtn">
       <FileUpload
-        endpoint="/api/products/storage/audio/product"
         fileType="audioOrZip"
         body={{ id: product.id }}
         bind:newFileUrl={audioProductUrl}
@@ -235,7 +234,6 @@
   <div class="mb-2 flex space-x-2">
     <div class="editBtn">
       <FileUpload
-        endpoint="/api/products/storage/audio/preview"
         fileType="audio"
         body={{ id: product.id }}
         bind:newFileUrl={audioPreviewUrl}
@@ -256,7 +254,6 @@
     <div class="flex space-x-2">
       <div class="editBtn">
         <FileUpload
-          endpoint="/api/products/storage/image"
           body={{ id: product.id }}
           bind:newFileUrl={imageUrl}
           bind:fileDraftId={imageDraftId}

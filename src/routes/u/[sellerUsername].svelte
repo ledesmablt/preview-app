@@ -150,7 +150,6 @@
     {#if authorizedForPage && isEditing}
       <div class="editBtn">
         <FileUpload
-          endpoint="/api/seller/storage/userImage"
           bind:newFileUrl={userImageUrl}
           bind:fileDraftId={userImageDraftId}
           mutation={userImageMutation}
