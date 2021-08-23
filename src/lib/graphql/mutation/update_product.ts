@@ -8,7 +8,7 @@ import { product } from '../types'
 import prisma from '$lib/services/prisma'
 import type { GraphQLContext } from '../server'
 import type { Product } from '@prisma/client'
-import { sellerOwnsProduct, updateBodyToSelect } from '$lib/utils/api'
+import { sellerOwnsProduct } from '$lib/utils/api'
 import { privateBucket, publicBucket } from '$lib/services/storage'
 import type { Bucket } from '@google-cloud/storage'
 
@@ -49,12 +49,10 @@ const update_product: GraphQLFieldConfig<any, GraphQLContext, any> = {
     if (typeof args.enabled === 'boolean') {
       updateBody.enabled = args.enabled
     }
-    const select = updateBodyToSelect<Product>(updateBody)
 
     let updatedProduct: Partial<Product> = {}
-    if (Object.keys(select).length > 0) {
+    if (Object.keys(updateBody).length > 0) {
       updatedProduct = await prisma.product.update({
-        select,
         where: {
           id: args.id
         },

@@ -149,7 +149,7 @@
       if (res.data.errors) {
         throw new Error(res.data.errors[0].message)
       }
-      formData = res.data.data.upload_product
+      formData = res.data.data.update_product
       // update all storage urls in memory
       product.imageUrl = imageUrl
       product.audioPreviewUrl = audioPreviewUrl
