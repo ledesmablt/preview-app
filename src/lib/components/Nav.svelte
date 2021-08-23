@@ -2,12 +2,21 @@
   import { session } from '$lib/stores'
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
-  import axios from 'axios'
+  import { mutation, graphql } from '$houdini'
+  import type { LogoutMutation } from '$houdini'
 
   interface NavLink {
     content: string
     href: string
   }
+
+  const logoutMutation = mutation<LogoutMutation>(
+    graphql`
+      mutation LogoutMutation {
+        logout
+      }
+    `
+  )
 
   let nonSellerLinks: NavLink[] = [
     { content: 'home', href: '/' },
@@ -24,15 +33,14 @@
   $: pageUnderManage = $page.path.startsWith('/manage')
 
   async function logOut() {
-    const res = await axios.post('/graphql', {
-      query: 'mutation { logout }'
-    })
-    if (res.data.errors) {
-      alert(res.data.errors[0].message)
-    }
-    $session = {}
-    if (pageUnderManage) {
-      goto('/')
+    try {
+      await logoutMutation(null)
+      $session = {}
+      if (pageUnderManage) {
+        goto('/')
+      }
+    } catch (err) {
+      alert(err[0].message)
     }
   }
 
