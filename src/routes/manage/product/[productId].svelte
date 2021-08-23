@@ -35,7 +35,7 @@
     }
   `)
   const product = { ...$queryData.get_product }
-  if (!product) {
+  if (!product.id) {
     throw new Error('Product not found')
   } else if ($session.seller?.id !== product.sellerId) {
     throw new Error('Unauthorized')
@@ -47,7 +47,7 @@
     description: product.description || '',
     price: product.price,
     currency: product.currency,
-    enabled: product.enabled
+    enabled: !!product.enabled
   }
   export let imageUrl = product.imageUrl || ''
   export let audioPreviewUrl = product.audioPreviewUrl || ''
@@ -249,7 +249,7 @@
       class="ml-2"
       name="enabled"
       type="checkbox"
-      bind:checked={!!formData.enabled}
+      bind:checked={formData.enabled}
     />
   </div>
 
