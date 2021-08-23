@@ -9,4 +9,6 @@ declare module '@sveltejs/kit' {
   }
 }
 
-type Nullable<T> = { [P in keyof T]: T[P] | null }
+declare global {
+  type Nullable<T> = { [P in keyof T]: T[P] | null }
+}

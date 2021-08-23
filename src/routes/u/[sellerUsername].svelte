@@ -54,7 +54,7 @@
     throw new Error(`Seller ${$page.params.sellerUsername} not found`)
   }
 
-  let products = seller.products
+  let products = seller.products as any[]
   let userImageUrl = seller.userImageUrl || ''
   let userImageDraftId = ''
   let isEditing = false

@@ -14,7 +14,7 @@ export function updateBodyToSelect<T>(updateBody: any): UpdateBodyToSelect<T> {
 }
 
 export async function sellerOwnsProduct(
-  seller: Partial<Seller>,
+  seller: Partial<Nullable<Seller>>,
   productId: string
 ): Promise<void> {
   const product = await prisma.product.findUnique({

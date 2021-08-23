@@ -21,7 +21,7 @@ const update_seller: GraphQLFieldConfig<any, GraphQLContext, any> = {
     if (!ctx.seller) {
       throw new Error('Unauthorized')
     }
-    const { username } = ctx.seller
+    const username = ctx.seller.username!
     const updateBody: Partial<Seller> = {}
 
     // TODO: validate all fields
