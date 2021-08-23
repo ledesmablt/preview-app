@@ -1,6 +1,7 @@
 <script lang="ts">
   import axios from 'axios'
   import { NO_CACHE } from '$lib/constants'
+  import type { mutation } from '$houdini'
 
   type FileType = 'image' | 'audio' | 'audioOrZip'
 
@@ -9,7 +10,7 @@
   export let body: Record<string, any> = {}
   export let fileType: FileType = 'image'
   export let fileDraftId: string = ''
-  export let mutation: string
+  export let mutationFunction: ReturnType<typeof mutation>
 
   const fileExtensions: Record<FileType, string> = {
     image: '.jpg, .jpeg, .png',
@@ -19,7 +20,6 @@
   fileExtensions.audioOrZip = fileExtensions.audio + ', .zip, .rar'
 
   let imageInput: HTMLElement
-
   async function onFileChange(event: any) {
     event.preventDefault()
     const file: File = event.target?.files[0]
@@ -29,11 +29,8 @@
     const contentType = file.type
     try {
       isUploading = true
-      const signedUrlRes = await axios.post('/graphql', {
-        variables: { ...body, contentType },
-        query: mutation
-      })
-      const { signedUrl, fileUrl, draftId } = signedUrlRes.data.data.fileUpload
+      const signedUrlRes = await mutationFunction({ ...body, contentType })
+      const { signedUrl, fileUrl, draftId } = signedUrlRes.fileUpload
       if (!signedUrl) {
         throw new Error('API did not return signedUrl')
       }

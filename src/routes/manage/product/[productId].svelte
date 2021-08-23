@@ -14,9 +14,14 @@
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { goto } from '$app/navigation'
-  import { query, graphql } from '$houdini'
+  import { query, mutation, graphql } from '$houdini'
   import { session } from '$app/stores'
-  import type { ManageProductQuery } from '$houdini'
+  import type {
+    ManageProductQuery,
+    ProductImageUploadMutation,
+    ProductAudioPreviewUploadMutation,
+    ProductAudioProductUploadMutation
+  } from '$houdini'
 
   const { data: queryData } = query<ManageProductQuery>(graphql`
     query ManageProductQuery($id: String!) {
@@ -53,25 +58,48 @@
   export let audioPreviewUrl = product.audioPreviewUrl || ''
   export let audioProductUrl = product.audioProductUrl || ''
 
-  const baseMutation = `mutation ($id: String!, $contentType: String!) {
-    fileUpload: {}(id: $id, contentType: $contentType) {
-      signedUrl
-      fileUrl
-      draftId
+  const imageUploadMutation = mutation(graphql`
+    mutation ProductImageUploadMutation($id: String!, $contentType: String!) {
+      fileUpload: upload_product_draft_display_image(
+        id: $id
+        contentType: $contentType
+      ) {
+        signedUrl
+        fileUrl
+        draftId
+      }
     }
-  }`
-  const imageUploadMutation = baseMutation.replace(
-    '{}',
-    'upload_product_draft_display_image'
-  )
-  const audioPreviewUploadMutation = baseMutation.replace(
-    '{}',
-    'upload_product_draft_audio_preview'
-  )
-  const audioProductUploadMutation = baseMutation.replace(
-    '{}',
-    'upload_product_draft_audio_product'
-  )
+  `)
+  const audioPreviewUploadMutation = mutation(graphql`
+    mutation ProductAudioPreviewUploadMutation(
+      $id: String!
+      $contentType: String!
+    ) {
+      fileUpload: upload_product_draft_audio_preview(
+        id: $id
+        contentType: $contentType
+      ) {
+        signedUrl
+        fileUrl
+        draftId
+      }
+    }
+  `)
+  const audioProductUploadMutation = mutation(graphql`
+    mutation ProductAudioProductUploadMutation(
+      $id: String!
+      $contentType: String!
+    ) {
+      fileUpload: upload_product_draft_audio_product(
+        id: $id
+        contentType: $contentType
+      ) {
+        signedUrl
+        fileUrl
+        draftId
+      }
+    }
+  `)
 
   let imageDraftId = ''
   let audioPreviewDraftId = ''
@@ -198,7 +226,7 @@
         body={{ id: product.id }}
         bind:newFileUrl={audioProductUrl}
         bind:fileDraftId={audioProductDraftId}
-        mutation={audioProductUploadMutation}
+        mutationFunction={audioProductUploadMutation}
       >
         upload product file
       </FileUpload>
@@ -217,7 +245,7 @@
         body={{ id: product.id }}
         bind:newFileUrl={audioPreviewUrl}
         bind:fileDraftId={audioPreviewDraftId}
-        mutation={audioPreviewUploadMutation}
+        mutationFunction={audioPreviewUploadMutation}
       >
         upload preview audio
       </FileUpload>
@@ -236,7 +264,7 @@
           body={{ id: product.id }}
           bind:newFileUrl={imageUrl}
           bind:fileDraftId={imageDraftId}
-          mutation={imageUploadMutation}
+          mutationFunction={imageUploadMutation}
         >
           upload image
         </FileUpload>

@@ -64,13 +64,15 @@
       }
     }
   `)
-  const userImageMutation = `mutation ($contentType: String!) {
-    fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
-      signedUrl
-      fileUrl
-      draftId
+  const userImageMutation = mutation(graphql`
+    mutation SellerUserImageUploadMutation($contentType: String!) {
+      fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
+        signedUrl
+        fileUrl
+        draftId
+      }
     }
-  }`
+  `)
 
   let seller = { ...querySeller }
   let products = [...queryProducts.map((p) => ({ ...p }))]
@@ -130,7 +132,7 @@
         <FileUpload
           bind:newFileUrl={userImageUrl}
           bind:fileDraftId={userImageDraftId}
-          mutation={userImageMutation}
+          mutationFunction={userImageMutation}
         >
           change
         </FileUpload>
