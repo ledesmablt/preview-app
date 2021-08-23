@@ -4,7 +4,8 @@
   import { onMount } from 'svelte'
   import { validate } from '$lib/utils/validation/signup'
   import type { Validation } from '$lib/utils/validation/signup'
-  import axios from 'axios'
+  import { mutation, graphql } from '$houdini'
+  import type { SignupMutation, SignupMutation$input } from '$houdini'
 
   $: authorized = $session.seller
   onMount(() => {
@@ -13,7 +14,29 @@
     }
   })
 
-  let formData = {
+  const signupMutation = mutation<SignupMutation>(graphql`
+    mutation SignupMutation(
+      $username: String!
+      $email: String!
+      $password: String!
+      $confirmPassword: String!
+    ) {
+      seller_signup(
+        username: $username
+        email: $email
+        password: $password
+        confirmPassword: $confirmPassword
+      ) {
+        token
+        seller {
+          id
+          username
+        }
+      }
+    }
+  `)
+
+  let formData: SignupMutation$input = {
     username: '',
     email: '',
     password: '',
@@ -38,33 +61,12 @@
 
   async function onSubmit() {
     submissionError = ''
-    const res = await axios.post('/graphql', {
-      variables: formData,
-      query: `mutation (
-          $username: String!
-          $email: String!
-          $password: String!
-          $confirmPassword: String!
-        ) {
-          seller_signup(
-            username: $username,
-            email: $email,
-            password: $password,
-            confirmPassword: $confirmPassword
-          ) {
-            token
-            seller {
-              id
-              username
-            }
-          }
-        }`
-    })
-    if (res.data.errors) {
-      submissionError = res.data.errors[0].message
-    } else {
-      $session = { seller: res.data.data.seller_signup.seller }
+    try {
+      const res = await signupMutation(formData)
+      $session = { seller: res.seller_signup!.seller }
       goto('/manage')
+    } catch (err) {
+      submissionError = err[0].message
     }
   }
 </script>
