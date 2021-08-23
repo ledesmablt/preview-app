@@ -52,7 +52,6 @@
 </script>
 
 <script lang="ts">
-  import _ from 'lodash'
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { goto } from '$app/navigation'

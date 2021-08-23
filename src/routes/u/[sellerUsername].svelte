@@ -10,7 +10,6 @@
 </script>
 
 <script lang="ts">
-  import _ from 'lodash'
   import { query, graphql } from '$houdini'
   import type { SellerPage } from '$houdini'
   import axios from 'axios'
