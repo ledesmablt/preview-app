@@ -55,7 +55,6 @@
   import _ from 'lodash'
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
-  import { getChangedFields } from '$lib/utils/client'
   import { goto } from '$app/navigation'
 
   export let product: any
