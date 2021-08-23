@@ -1,58 +1,18 @@
 <script lang="ts" context="module">
-  import _ from 'lodash'
-  import type { Load } from '@sveltejs/kit'
-  export const load: Load = async ({ page, fetch }) => {
-    const username = page.params.sellerUsername
-    const res = await fetch('/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        variables: { username, fromShop: true },
-        query: `query ($username: String!, $fromShop: Boolean!) {
-          get_seller(username: $username) {
-            id
-            email
-            username
-            bio
-            userImageUrl
-            products(fromShop: $fromShop) {
-              id
-              name
-              price
-              currency
-              enabled
-              imageUrl
-            }
-          }
-        }`
-      })
-    }).then((r) => r.json())
-    if (res.errors) {
-      return {
-        status: 400,
-        error: new Error(res.errors[0].message)
-      }
-    }
-    const seller = res.data.get_seller
-    if (!seller) {
-      return {
-        status: 404,
-        error: new Error(`Seller ${username} not found`)
-      }
-    }
-    const products = seller.products
+  import type { SellerPage$input } from '$houdini'
+  import type { LoadInput } from '@sveltejs/kit'
+  export function SellerPageVariables({ page }: LoadInput): SellerPage$input {
     return {
-      props: {
-        seller,
-        products
-      }
+      username: page.params.sellerUsername,
+      fromShop: true
     }
   }
 </script>
 
 <script lang="ts">
+  import _ from 'lodash'
+  import { query, graphql } from '$houdini'
+  import type { SellerPage } from '$houdini'
   import axios from 'axios'
   import { page } from '$app/stores'
   import { session } from '$lib/stores'
@@ -63,9 +23,25 @@
     $session.seller?.username === $page.params.sellerUsername &&
     $page.params.sellerUsername
 
-  export let seller: any
-  export let products: any[]
-
+  const { data: queryData } = query<SellerPage>(graphql`
+    query SellerPage($username: String!, $fromShop: Boolean!) {
+      get_seller(username: $username) {
+        id
+        email
+        username
+        bio
+        userImageUrl
+        products(fromShop: $fromShop) {
+          id
+          name
+          price
+          currency
+          enabled
+          imageUrl
+        }
+      }
+    }
+  `)
   const userImageMutation = `mutation ($contentType: String!) {
     fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
       signedUrl
@@ -73,6 +49,12 @@
       draftId
     }
   }`
+  let seller = $queryData.get_seller as any
+  if (!seller) {
+    throw new Error(`Seller ${$page.params.sellerUsername} not found`)
+  }
+
+  let products = seller.products
   let userImageUrl = seller.userImageUrl || ''
   let userImageDraftId = ''
   let isEditing = false
@@ -84,11 +66,11 @@
   }
 
   function resetImage() {
-    userImageUrl = seller.userImageUrl || ''
+    userImageUrl = seller!.userImageUrl || ''
   }
 
   async function onSave() {
-    const changedValues = getChangedFields(editFormData, seller)
+    const changedValues = getChangedFields(editFormData, seller!)
     if (userImageDraftId) {
       changedValues.userImageDraftId = userImageDraftId
     }
