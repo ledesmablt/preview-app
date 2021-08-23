@@ -6,7 +6,8 @@ import {
   GraphQLObjectType,
   GraphQLString,
   GraphQLBoolean,
-  GraphQLFloat
+  GraphQLFloat,
+  GraphQLNonNull
 } from 'graphql'
 import prisma from '$lib/services/prisma'
 import { publicBucket, privateBucket } from '$lib/services/storage'
@@ -16,13 +17,13 @@ export const seller: GraphQLObjectType = new GraphQLObjectType<Seller, Context>(
     name: 'Seller',
     fields: () => ({
       id: {
-        type: GraphQLID
+        type: GraphQLNonNull(GraphQLID)
       },
       username: {
-        type: GraphQLString
+        type: GraphQLNonNull(GraphQLString)
       },
       email: {
-        type: GraphQLString
+        type: GraphQLNonNull(GraphQLString)
       },
       password: {
         type: GraphQLString,
@@ -45,7 +46,7 @@ export const seller: GraphQLObjectType = new GraphQLObjectType<Seller, Context>(
         }
       },
       products: {
-        type: GraphQLList(product),
+        type: GraphQLList(GraphQLNonNull(product)),
         args: {
           fromShop: { type: GraphQLBoolean }
         },
@@ -72,7 +73,7 @@ export const product: GraphQLObjectType = new GraphQLObjectType<
   name: 'Product',
   fields: () => ({
     id: {
-      type: GraphQLID
+      type: GraphQLNonNull(GraphQLID)
     },
     name: {
       type: GraphQLString
@@ -90,10 +91,10 @@ export const product: GraphQLObjectType = new GraphQLObjectType<
       type: GraphQLBoolean
     },
     sellerId: {
-      type: GraphQLID
+      type: GraphQLNonNull(GraphQLID)
     },
     seller: {
-      type: seller
+      type: GraphQLNonNull(seller)
     },
     imageUrl: {
       type: GraphQLString,

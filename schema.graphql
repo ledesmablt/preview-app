@@ -16,7 +16,7 @@ type Mutation {
   seller_login(emailOrUsername: String, password: String): LoginResult
   seller_signup(confirmPassword: String, email: String, password: String, username: String): LoginResult
   update_product(audioPreviewDraftId: String, audioProductDraftId: String, currency: String, description: String, enabled: Boolean, id: String, imageDraftId: String, name: String, price: Float): Product
-  update_seller(bio: String, email: String, password: String, userImageDraftId: String, username: String): Seller
+  update_seller(bio: String, email: String, password: String, userImageDraftId: String): Seller
   upload_product_draft_audio_preview(contentType: String, id: String): DraftUploadFile
   upload_product_draft_audio_product(contentType: String, id: String): DraftUploadFile
   upload_product_draft_display_image(contentType: String, id: String): DraftUploadFile
@@ -29,12 +29,12 @@ type Product {
   currency: String
   description: String
   enabled: Boolean
-  id: ID
+  id: ID!
   imageUrl: String
   name: String
   price: Float
-  seller: Seller
-  sellerId: ID
+  seller: Seller!
+  sellerId: ID!
 }
 
 type Query {
@@ -44,10 +44,10 @@ type Query {
 
 type Seller {
   bio: String
-  email: String
-  id: ID
+  email: String!
+  id: ID!
   password: String
-  products(fromShop: Boolean): [Product]
+  products(fromShop: Boolean): [Product!]
   userImageUrl: String
-  username: String
+  username: String!
 }
