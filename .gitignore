@@ -9,3 +9,4 @@ build
 src/lib/styles/tailwind-output.css
 tailwind.config.js
 /gcloud-service-account.json
+/$houdini

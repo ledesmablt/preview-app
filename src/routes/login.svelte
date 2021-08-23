@@ -1,8 +1,8 @@
 <script lang="ts">
+  import { mutation, graphql, SellerLogin } from '$houdini'
   import { goto } from '$app/navigation'
   import { session } from '$lib/stores'
   import { onMount } from 'svelte'
-  import axios from 'axios'
 
   $: authorized = $session.seller
 
@@ -17,28 +17,25 @@
     password: ''
   }
   let submissionError: string = ''
+  const loginMutation = mutation<SellerLogin>(graphql`
+    mutation SellerLogin($emailOrUsername: String!, $password: String!) {
+      seller_login(emailOrUsername: $emailOrUsername, password: $password) {
+        token
+        seller {
+          id
+          username
+        }
+      }
+    }
+  `)
 
   async function onSubmit() {
-    const res = await axios.post('/graphql', {
-      variables: formData,
-      query: `mutation (
-        $emailOrUsername: String!,
-        $password: String!
-      ) {
-          seller_login(emailOrUsername: $emailOrUsername, password: $password) {
-            token
-            seller {
-              id
-              username
-            }
-          }
-        }`
-    })
-    if (res.data.errors) {
-      submissionError = res.data.errors[0].message
-    } else {
-      $session = { seller: res.data.data.seller_login.seller }
+    try {
+      const res = await loginMutation(formData)
+      $session = { seller: res!.seller_login!.seller }
       goto('/manage')
+    } catch (err) {
+      submissionError = err[0].message
     }
   }
 </script>
