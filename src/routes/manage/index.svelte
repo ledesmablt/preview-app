@@ -1,70 +1,64 @@
 <script lang="ts" context="module">
-  import type { Load } from '@sveltejs/kit'
-  export const load: Load = async ({ session, fetch }) => {
-    const res = await fetch('/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        variables: { username: session.seller?.username },
-        query: `query ($username: String!) {
-          get_seller(username: $username) {
-            products {
-              id
-              name
-              price
-              currency
-              enabled
-              imageUrl
-            }
-          }
-        }`
-      })
-    }).then((r) => r.json())
-    if (res.errors) {
-      return {
-        status: 400,
-        error: new Error(res.errors[0].message)
-      }
+  import type { ManagePageProductsQuery$input } from '$houdini'
+  import type { LoadInput } from '@sveltejs/kit'
+  export function ManagePageProductsQueryVariables({
+    session
+  }: LoadInput): ManagePageProductsQuery$input {
+    if (!session.seller) {
+      throw new Error('Unauthorized')
     }
-    const products = res.data.get_seller?.products || []
     return {
-      props: {
-        products
-      }
+      username: session.seller.username
     }
   }
 </script>
 
 <script lang="ts">
-  import axios from 'axios'
   import { goto } from '$app/navigation'
   import { session } from '$lib/stores'
+  import { query, mutation, graphql } from '$houdini'
+  import type { ManagePageProductsQuery, CreateProductMutation } from '$houdini'
 
-  export let products: any[] = []
-  let sellerUsername = $session?.seller?.username
+  const { data: queryData } = query<ManagePageProductsQuery>(graphql`
+    query ManagePageProductsQuery($username: String!) {
+      get_seller(username: $username) {
+        products {
+          id
+          name
+          price
+          currency
+          enabled
+          imageUrl
+        }
+      }
+    }
+  `)
+  const createProductMutation = mutation<CreateProductMutation>(graphql`
+    mutation CreateProductMutation {
+      create_product {
+        id
+      }
+    }
+  `)
+
+  let products = [
+    ...($queryData.get_seller?.products || []).map((p) => ({ ...p }))
+  ]
 
   async function onCreateProduct() {
-    const res = await axios.post('/graphql', {
-      query: `mutation {
-        create_product {
-          id
-        }
-      }`
-    })
-    if (res.data.errors) {
-      throw new Error(res.data.errors[0].message)
+    try {
+      const res = await createProductMutation(null)
+      goto(`/manage/product/${res.create_product!.id}`)
+    } catch (err) {
+      alert(err[0].message)
     }
-    const productId = res.data.data.create_product.id
-    goto(`/manage/product/${productId}`)
   }
 </script>
 
 <h1 class="font-medium text-lg">Manage</h1>
 <a
   class="underline hover:text-orange-500 duration-75"
-  href={`/u/${sellerUsername}`}
+  href={`/u/${$session?.seller?.username}`}
 >
   my page
 </a>
