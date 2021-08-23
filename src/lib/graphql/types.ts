@@ -46,7 +46,7 @@ export const seller: GraphQLObjectType = new GraphQLObjectType<Seller, Context>(
         }
       },
       products: {
-        type: GraphQLList(GraphQLNonNull(product)),
+        type: GraphQLNonNull(GraphQLList(GraphQLNonNull(product))),
         args: {
           fromShop: { type: GraphQLBoolean }
         },

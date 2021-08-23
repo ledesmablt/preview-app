@@ -47,7 +47,7 @@ type Seller {
   email: String!
   id: ID!
   password: String
-  products(fromShop: Boolean): [Product!]
+  products(fromShop: Boolean): [Product!]!
   userImageUrl: String
   username: String!
 }

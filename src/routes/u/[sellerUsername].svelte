@@ -12,12 +12,15 @@
 </script>
 
 <script lang="ts">
-  import { query, graphql } from '$houdini'
+  import { query, mutation, graphql } from '$houdini'
   import type { SellerPageQuery } from '$houdini'
-  import axios from 'axios'
   import { page } from '$app/stores'
   import { session } from '$lib/stores'
   import FileUpload from '$lib/components/FileUpload.svelte'
+  import type {
+    UpdateSellerMutation,
+    UpdateSellerMutation$input
+  } from '$houdini'
 
   const { data: queryData } = query<SellerPageQuery>(graphql`
     query SellerPageQuery($username: String!, $fromShop: Boolean!) {
@@ -38,11 +41,29 @@
       }
     }
   `)
-  let seller = { ...$queryData.get_seller }
-  if (!seller.id) {
+  let { products: queryProducts, ...querySeller } = $queryData.get_seller!
+  if (!querySeller.id) {
     throw new Error(`Seller ${$page.params.sellerUsername} not found`)
   }
 
+  const updateSellerMutation = mutation<UpdateSellerMutation>(graphql`
+    mutation UpdateSellerMutation(
+      $bio: String
+      $email: String
+      $userImageDraftId: String
+    ) {
+      update_seller(
+        bio: $bio
+        email: $email
+        userImageDraftId: $userImageDraftId
+      ) {
+        id
+        username
+        bio
+        email
+      }
+    }
+  `)
   const userImageMutation = `mutation ($contentType: String!) {
     fileUpload: upload_seller_draft_user_image(contentType: $contentType) {
       signedUrl
@@ -51,7 +72,8 @@
     }
   }`
 
-  let products = seller!.products || []
+  let seller = { ...querySeller }
+  let products = [...queryProducts.map((p) => ({ ...p }))]
   let userImageUrl = seller.userImageUrl || ''
   let userImageDraftId = ''
   let isEditing = false
@@ -66,45 +88,25 @@
     $page.params.sellerUsername
 
   function resetImage() {
-    userImageUrl = seller!.userImageUrl || ''
+    userImageUrl = seller.userImageUrl || ''
   }
 
   async function onSave() {
-    const variables: Record<string, any> = { ...editFormData }
-    if (userImageDraftId) {
-      variables.userImageDraftId = userImageDraftId
+    const variables: UpdateSellerMutation$input = {
+      ...editFormData,
+      userImageDraftId
     }
     isSaving = true
-    const res = await axios.post('/graphql', {
-      variables,
-      query: `mutation (
-        $bio: String,
-        $email: String,
-        $password: String,
-        $userImageDraftId: String
-      ) {
-        update_seller(
-          bio: $bio,
-          email: $email,
-          password: $password,
-          userImageDraftId: $userImageDraftId
-        ) {
-          id
-          username
-          bio
-          email
-        }
-      }`
-    })
-    if (res.data.errors) {
-      console.error(res)
-      alert(res.data.errors[0].message)
+    try {
+      const result = await updateSellerMutation(variables)
+      seller = { ...seller, ...result.update_seller, userImageUrl }
+      userImageDraftId = ''
+    } catch (err) {
+      alert(err[0].message)
+    } finally {
+      isEditing = false
+      isSaving = false
     }
-    seller = res.data.data.update_seller
-    seller.userImageUrl = userImageUrl
-    userImageDraftId = ''
-    isEditing = false
-    isSaving = false
   }
 </script>
 
