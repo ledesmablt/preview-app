@@ -1,52 +1,11 @@
 <script lang="ts" context="module">
-  import type { Load } from '@sveltejs/kit'
-  export const load: Load = async ({ page, fetch, session }) => {
-    const res = await fetch('/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        variables: { id: page.params.productId },
-        query: `query ($id: String!) {
-          get_product(id: $id) {
-            id
-            name
-            description
-            price
-            currency
-            enabled
-            imageUrl
-            sellerId
-            audioPreviewUrl
-            audioProductUrl
-          }
-        }`
-      })
-    }).then((r) => r.json())
-    if (res.errors) {
-      return {
-        status: 400,
-        error: new Error(res.errors[0].message)
-      }
-    }
-    const product = res.data.get_product
-
-    if (!product) {
-      return {
-        status: 404
-      }
-    }
-    if (session.seller?.id !== product.sellerId) {
-      // product should be owned by seller
-      return {
-        status: 403
-      }
-    }
+  import type { ManageProductQuery$input } from '$houdini'
+  import type { LoadInput } from '@sveltejs/kit'
+  export function ManageProductQueryVariables({
+    page
+  }: LoadInput): ManageProductQuery$input {
     return {
-      props: {
-        product
-      }
+      id: page.params.productId
     }
   }
 </script>
@@ -55,8 +14,33 @@
   import axios from 'axios'
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { goto } from '$app/navigation'
+  import { query, graphql } from '$houdini'
+  import { session } from '$app/stores'
+  import type { ManageProductQuery } from '$houdini'
 
-  export let product: any
+  const { data: queryData } = query<ManageProductQuery>(graphql`
+    query ManageProductQuery($id: String!) {
+      get_product(id: $id) {
+        id
+        name
+        description
+        price
+        currency
+        enabled
+        imageUrl
+        sellerId
+        audioPreviewUrl
+        audioProductUrl
+      }
+    }
+  `)
+  const product = { ...$queryData.get_product }
+  if (!product) {
+    throw new Error('Product not found')
+  } else if ($session.seller?.id !== product.sellerId) {
+    throw new Error('Unauthorized')
+  }
+
   let formData = {
     id: product.id,
     name: product.name,
@@ -265,7 +249,7 @@
       class="ml-2"
       name="enabled"
       type="checkbox"
-      bind:checked={formData.enabled}
+      bind:checked={!!formData.enabled}
     />
   </div>
 
