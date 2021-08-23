@@ -99,23 +99,23 @@
   let isSaving = false
 
   async function onSubmit() {
-    const changedFields: any = {
-      ...getChangedFields(formData, product),
+    const variables: Record<string, any> = {
+      ...formData,
       id: product.id
     }
     if (imageDraftId) {
-      changedFields.imageDraftId = imageDraftId
+      variables.imageDraftId = imageDraftId
     }
     if (audioPreviewDraftId) {
-      changedFields.audioPreviewDraftId = audioPreviewDraftId
+      variables.audioPreviewDraftId = audioPreviewDraftId
     }
     if (audioProductDraftId) {
-      changedFields.audioProductDraftId = audioProductDraftId
+      variables.audioProductDraftId = audioProductDraftId
     }
     try {
       isSaving = true
       const res = await axios.post('/graphql', {
-        variables: changedFields,
+        variables,
         query: `mutation (
           $id: String,
           $name: String,
@@ -150,10 +150,7 @@
       if (res.data.errors) {
         throw new Error(res.data.errors[0].message)
       }
-      formData = {
-        ...formData,
-        ..._.pickBy(res.data.data.upload_product, (v) => v !== null)
-      }
+      formData = res.data.data.upload_product
       // update all storage urls in memory
       product.imageUrl = imageUrl
       product.audioPreviewUrl = audioPreviewUrl

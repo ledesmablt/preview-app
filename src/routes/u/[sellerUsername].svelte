@@ -16,7 +16,6 @@
   import axios from 'axios'
   import { page } from '$app/stores'
   import { session } from '$lib/stores'
-  import { getChangedFields } from '$lib/utils/client'
   import FileUpload from '$lib/components/FileUpload.svelte'
 
   $: authorizedForPage =
@@ -61,8 +60,7 @@
   let isSaving = false
   let editFormData = {
     email: seller.email,
-    bio: seller.bio,
-    username: seller.username
+    bio: seller.bio
   }
 
   function resetImage() {
@@ -70,22 +68,20 @@
   }
 
   async function onSave() {
-    const changedValues = getChangedFields(editFormData, seller!)
+    const variables: Record<string, any> = { ...editFormData }
     if (userImageDraftId) {
-      changedValues.userImageDraftId = userImageDraftId
+      variables.userImageDraftId = userImageDraftId
     }
     isSaving = true
     const res = await axios.post('/graphql', {
-      variables: changedValues,
+      variables,
       query: `mutation (
-        $username: String,
         $bio: String,
         $email: String,
         $password: String,
         $userImageDraftId: String
       ) {
         update_seller(
-          username: $username,
           bio: $bio,
           email: $email,
           password: $password,
@@ -95,7 +91,6 @@
           username
           bio
           email
-          password
         }
       }`
     })
@@ -103,10 +98,7 @@
       console.error(res)
       alert(res.data.errors[0].message)
     }
-    seller = {
-      ...seller,
-      ..._.pickBy(res.data.data.update_seller, (v) => v !== null)
-    }
+    seller = res.data.data.update_seller
     seller.userImageUrl = userImageUrl
     userImageDraftId = ''
     isEditing = false
@@ -144,14 +136,13 @@
 
   <div>
     <div class="flex flex-col max-w-md">
+      <p>{seller.username}</p>
       {#if !isEditing}
-        <p>{seller.username}</p>
         <p>{seller.email}</p>
         {#if seller.bio}
           <p>{seller.bio}</p>
         {/if}
       {:else}
-        <input class="editField" bind:value={editFormData.username} />
         <input class="editField" bind:value={editFormData.email} />
         <textarea class="editField" bind:value={editFormData.bio} />
       {/if}
