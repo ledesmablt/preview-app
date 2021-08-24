@@ -14,7 +14,7 @@
   import FileUpload from '$lib/components/FileUpload.svelte'
   import { goto } from '$app/navigation'
   import { query, mutation, graphql } from '$houdini'
-  import { session } from '$app/stores'
+  import { session } from '$lib/stores'
   import type {
     ManageProductQuery,
     UpdateProductMutation,
