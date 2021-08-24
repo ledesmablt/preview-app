@@ -381,9 +381,9 @@
     "@types/node" "*"
 
 "@types/node@*":
-  version "16.4.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.4.9.tgz#04eb3da65d08ea377f5e682bf0d22dc1f5e7f19e"
-  integrity sha512-HXhRf581nCItzn8yevv4LYt+bJ5cBbDBAJExbDPMeU/2n5/j0ZemGpayahFBP4xL7RseaCLASLD9i9AYyDe7Nw==
+  version "16.7.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.7.1.tgz#c6b9198178da504dfca1fd0be9b2e1002f1586f0"
+  integrity sha512-ncRdc45SoYJ2H4eWU9ReDfp3vtFqDYhjOsKlFFUDEn8V1Bgr2RjYal8YT5byfadWIRluhPFU6JiDOl0H6Sl87A==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -1676,35 +1676,35 @@ hosted-git-info@^2.1.4:
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.8.9.tgz#dffc0bf9a21c02209090f2aa69429e1414daf3f9"
   integrity sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==
 
-houdini-common@^0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/houdini-common/-/houdini-common-0.10.5.tgz#dd0e350875a2426e8b3aa7937a1ece3ae7affa58"
-  integrity sha512-zfIOV/EbJ/WGlq1YwZvCY51Fe3JVR86s/IGm5Dhvf3VMGBnNm0fIG2o9+MV93L+ICtKIK3gm4UV/R8PP0UaWwQ==
+houdini-common@^0.10.6:
+  version "0.10.6"
+  resolved "https://registry.yarnpkg.com/houdini-common/-/houdini-common-0.10.6.tgz#7031e18170669e0dadd50d932a586ba6c6c3020b"
+  integrity sha512-NugE1peWVr+lFDARkIVv+Id7haqy5t+2wm60fINmgffrpwg/d6QuVhUvAm+7LMigotewsOEhk8O2gt5zN/TjCw==
   dependencies:
     "@babel/parser" "^7.13.4"
     mkdirp "^1.0.4"
 
-houdini-preprocess@^0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/houdini-preprocess/-/houdini-preprocess-0.10.5.tgz#116a97adebefc8c3343cf013e0b785f99bb5729d"
-  integrity sha512-A4AddHB42Y732Z78DwX9LUyjYlWF3v8+OGAtrOIr4CsW2VDgnH+MW9rEDrB/AoaIAQUca4qeHbLoexGY7hbHdA==
+houdini-preprocess@^0.10.7:
+  version "0.10.7"
+  resolved "https://registry.yarnpkg.com/houdini-preprocess/-/houdini-preprocess-0.10.7.tgz#0118be6781e7950bdaeb3bbd36541b1ade212b35"
+  integrity sha512-mubig5qJWfVztkm3HCGbw6dl4m8Qk9HcWrsxZKzRh3XykqXh73NwBGUM2MdDf7LL6cqUTFTEPqsYEOanatMFGg==
   dependencies:
     "@types/mkdirp" "^1.0.1"
     babylon "^7.0.0-beta.47"
     estree-walker "^2.0.2"
     graphql "15.5.0"
-    houdini "^0.10.5"
-    houdini-common "^0.10.5"
+    houdini "^0.10.7"
+    houdini-common "^0.10.6"
     mkdirp "^1.0.4"
     prettier "*"
     prettier-plugin-svelte "^2.1.1"
     recast "^0.20.4"
     svelte "^3.17.3"
 
-houdini@^0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/houdini/-/houdini-0.10.5.tgz#f1406623c93a1219fad330f5b3b99dc0673cb89d"
-  integrity sha512-arDNlT6Iyn4Jonw160opuaGvb5PdPstDwfQkifGZOklHkGzMxV//kC9dczBi1I0OeyTMFBwMFVk4SxQLQnBgpw==
+houdini@^0.10.7:
+  version "0.10.7"
+  resolved "https://registry.yarnpkg.com/houdini/-/houdini-0.10.7.tgz#5b74ce4b5f0c0027035e1daf8f7e4d6ab812eb34"
+  integrity sha512-zc5MclBzB6dENfGd2JTpVuC2tIn+d+DXmBA9DJlLh0yvbaUHahThP3ckWAQYQTn/OPwCAOuUY3Zro6oT6ahD5g==
   dependencies:
     "@graphql-tools/merge" "^6.2.7"
     "@types/inquirer" "^7.3.1"
@@ -1713,7 +1713,7 @@ houdini@^0.10.5:
     estree-walker "^2.0.2"
     glob "^7.1.6"
     graphql "^15.5.0"
-    houdini-common "^0.10.5"
+    houdini-common "^0.10.6"
     inquirer "^7.3.3"
     mkdirp "^1.0.4"
     node-fetch "^2.6.1"
